@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, Link } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Layout, Menu, Button, theme, Drawer, Space } from 'antd';
 import {
   MenuFoldOutlined,
@@ -124,7 +124,11 @@ const MainLayout = () => {
   ];
 
   const handleMenuClick = (key: string) => {
-    navigate(`/${key}`);
+    if (key === 'home') {
+      navigate('/dashboard');
+    } else {
+      navigate(`/${key}`);
+    }
     if (isMobile) {
       setDrawerOpen(false);
     }

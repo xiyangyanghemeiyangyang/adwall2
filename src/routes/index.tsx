@@ -3,6 +3,8 @@ import MainLayout from '../layouts/MainLayout';
 import Dashboard from '../pages/Dashboard';
 import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
+import CustomerManagement from '../pages/CustomerManagement';
+import CustomerDetail from '../pages/CustomerDetail';
 // import AccountManagement from '../pages/AccountManagement';
 // import ContentReview from '../pages/ContentReview';
 // import RegionManagement from '../pages/RegionManagement';
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
       {
         path: 'workbench/homepage',
         element: <Dashboard />,
+      },
+      {
+        path: 'customer-management',
+        element: <CustomerManagement />,
+      },
+      {
+        path: 'customer-management/:id',
+        element: <CustomerDetail />,
       },
       // {
       //   path: 'account-management',
