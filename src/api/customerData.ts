@@ -55,7 +55,32 @@ export interface CustomerStats {
 }
 
 // 模拟客户数据
-export const mockCustomers: Customer[] = [
+const STORAGE_KEY = 'crm_customers';
+
+const saveCustomers = (data: Customer[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (err) {
+    // ignore storage errors in mock env
+  }
+};
+//修改了更新新用户小时的问题。
+const loadCustomers = (seed: Customer[]): Customer[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Customer[];
+      return Array.isArray(parsed) ? parsed : seed;
+    }
+  } catch (err) {
+    // ignore parse errors and fall back to seed
+  }
+  // initialize storage with seed on first load
+  saveCustomers(seed);
+  return seed;
+};
+
+const defaultMockCustomers: Customer[] = [
   {
     id: '1',
     name: '张三',
@@ -154,8 +179,29 @@ export const mockCustomers: Customer[] = [
   }
 ];
 
-// 模拟跟进记录数据
-export const mockFollowUpRecords: FollowUpRecord[] = [
+export const mockCustomers: Customer[] = loadCustomers(defaultMockCustomers);
+
+const STORAGE_FOLLOWUPS = 'crm_followups';
+const STORAGE_TASKS = 'crm_tasks';
+
+const saveFollowUps = (data: FollowUpRecord[]) => {
+  try { localStorage.setItem(STORAGE_FOLLOWUPS, JSON.stringify(data)); } catch {}
+};
+
+const loadFollowUps = (seed: FollowUpRecord[]): FollowUpRecord[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_FOLLOWUPS);
+    if (raw) {
+      const parsed = JSON.parse(raw) as FollowUpRecord[];
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  saveFollowUps(seed);
+  return seed;
+};
+
+// 模拟跟进记录数据（默认种子）
+const defaultMockFollowUpRecords: FollowUpRecord[] = [
   {
     id: '1',
     customerId: '1',
@@ -198,8 +244,26 @@ export const mockFollowUpRecords: FollowUpRecord[] = [
   }
 ];
 
-// 模拟任务数据
-export const mockTasks: Task[] = [
+export const mockFollowUpRecords: FollowUpRecord[] = loadFollowUps(defaultMockFollowUpRecords);
+
+const saveTasks = (data: Task[]) => {
+  try { localStorage.setItem(STORAGE_TASKS, JSON.stringify(data)); } catch {}
+};
+
+const loadTasks = (seed: Task[]): Task[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_TASKS);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Task[];
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  saveTasks(seed);
+  return seed;
+};
+
+// 模拟任务数据（默认种子）
+const defaultMockTasks: Task[] = [
   {
     id: '1',
     customerId: '1',
@@ -250,6 +314,8 @@ export const mockTasks: Task[] = [
     createTime: '2024-01-22 11:30:00'
   }
 ];
+
+export const mockTasks: Task[] = loadTasks(defaultMockTasks);
 
 // 模拟客户统计数据
 export const mockCustomerStats: CustomerStats[] = [
@@ -345,6 +411,24 @@ export const customerApi = {
     });
   },
 
+  // 新增跟进记录
+  addFollowUpRecord: (payload: Omit<FollowUpRecord, 'id' | 'createTime'> & Partial<Pick<FollowUpRecord, 'id' | 'createTime'>>) => {
+    return new Promise<boolean>((resolve) => {
+      setTimeout(() => {
+        const newId = String(Math.max(0, ...mockFollowUpRecords.map(r => Number(r.id))) + 1);
+        const now = new Date().toISOString();
+        const record: FollowUpRecord = {
+          id: payload.id || newId,
+          createTime: payload.createTime || now,
+          ...payload,
+        } as FollowUpRecord;
+        mockFollowUpRecords.unshift(record);
+        saveFollowUps(mockFollowUpRecords);
+        resolve(true);
+      }, 300);
+    });
+  },
+
   // 新增客户
   addCustomer: (payload: Omit<Customer, 'id' | 'createTime' | 'lastContactTime'> & Partial<Pick<Customer, 'createTime' | 'lastContactTime'>>) => {
     return new Promise<boolean>((resolve) => {
@@ -356,11 +440,11 @@ export const customerApi = {
           createTime: payload.createTime || now,
           lastContactTime: payload.lastContactTime || payload.createTime || now,
           ...payload,
-          // Ensure array fields exist with safe defaults
           permissions: Array.isArray((payload as any).permissions) ? (payload as any).permissions : [],
           tags: Array.isArray((payload as any).tags) ? (payload as any).tags : [],
         } as Customer;
         mockCustomers.unshift(customer);
+        saveCustomers(mockCustomers);
         resolve(true);
       }, 300);
     });
@@ -375,6 +459,7 @@ export const customerApi = {
         const index = mockCustomers.findIndex(c => c.id === id);
         if (index !== -1) {
           mockCustomers[index] = { ...mockCustomers[index], ...payload } as Customer;
+          saveCustomers(mockCustomers);
           resolve(true);
         } else {
           resolve(false);
@@ -389,6 +474,24 @@ export const customerApi = {
       setTimeout(() => {
         const tasks = mockTasks.filter(task => task.customerId === customerId);
         resolve(tasks);
+      }, 300);
+    });
+  },
+
+  // 新增任务
+  addTask: (payload: Omit<Task, 'id' | 'createTime'> & Partial<Pick<Task, 'id' | 'createTime'>>) => {
+    return new Promise<boolean>((resolve) => {
+      setTimeout(() => {
+        const newId = String(Math.max(0, ...mockTasks.map(t => Number(t.id))) + 1);
+        const now = new Date().toISOString();
+        const task: Task = {
+          id: payload.id || newId,
+          createTime: payload.createTime || now,
+          ...payload,
+        } as Task;
+        mockTasks.unshift(task);
+        saveTasks(mockTasks);
+        resolve(true);
       }, 300);
     });
   },
@@ -414,6 +517,7 @@ export const customerApi = {
         const customer = mockCustomers.find(c => c.id === id);
         if (customer) {
           customer.status = status;
+          saveCustomers(mockCustomers);
           resolve(true);
         } else {
           resolve(false);
@@ -429,6 +533,7 @@ export const customerApi = {
         const customer = mockCustomers.find(c => c.id === id);
         if (customer) {
           customer.contractStatus = contractStatus;
+          saveCustomers(mockCustomers);
           resolve(true);
         } else {
           resolve(false);

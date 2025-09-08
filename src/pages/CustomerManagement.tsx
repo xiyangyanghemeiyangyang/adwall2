@@ -14,6 +14,7 @@ import {
   Statistic,
   message,
   Modal,
+  Popconfirm,//注销账户更改的引入
   Form,
   Checkbox
 } from 'antd';
@@ -152,20 +153,14 @@ const CustomerManagement = () => {
   };
 
   // 注销账户
-  const handleDeleteCustomer = (customer: Customer) => {
-    Modal.confirm({
-      title: '确认注销',
-      content: `确定要注销客户"${customer.name}"的账户吗？`,
-      onOk: async () => {
-        try {
-          await customerApi.updateCustomerStatus(customer.id, '注销');
-          message.success('客户账户已注销');
-          fetchCustomers(pagination.current, pagination.pageSize, searchText, contractStatusFilter, statusFilter);
-        } catch (error) {
-          message.error('注销客户账户失败');
-        }
-      }
-    });
+  const handleDeleteCustomer = async (customer: Customer) => {
+    try {
+      await customerApi.updateCustomerStatus(customer.id, '注销');
+      message.success('客户账户已注销');
+      fetchCustomers(pagination.current, pagination.pageSize, searchText, contractStatusFilter, statusFilter);
+    } catch (error) {
+      message.error('注销客户账户失败');
+    }
   };
 
   // 表格列定义
@@ -288,14 +283,23 @@ const CustomerManagement = () => {
             编辑
           </Button>
           {record.status === '正常' && (
-            <Button 
-              type="link" 
-              danger
-              icon={<DeleteOutlined />} 
-              onClick={() => handleDeleteCustomer(record)}
+            <Popconfirm
+              title="确认注销"
+              description={`确定要注销客户"${record.name}"的账户吗？`}
+              okText="确认"
+              cancelText="取消"
+              // 按钮样式的更改
+              okButtonProps={{ type: 'link', style: { color: '#69b1ff' } }}
+              onConfirm={() => handleDeleteCustomer(record)}
             >
-              注销账户
-            </Button>
+              <Button 
+                type="link" 
+                danger
+                icon={<DeleteOutlined />} 
+              >
+                注销账户
+              </Button>
+            </Popconfirm>
           )}
         </Space>
       ),
@@ -318,7 +322,6 @@ const CustomerManagement = () => {
     <div className="customer-management">
       <div style={{ marginBottom: '24px' }}>
         <Title level={4}>客户管理</Title>
-        <Text type="secondary">管理所有客户信息，跟踪客户状态和跟进记录</Text>
       </div>
 
       {/* 统计卡片 */}

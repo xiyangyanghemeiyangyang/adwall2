@@ -45,6 +45,8 @@ const CustomerDetail = () => {
   const [loading, setLoading] = useState(false);
   const [followUpModalVisible, setFollowUpModalVisible] = useState(false);
   const [taskModalVisible, setTaskModalVisible] = useState(false);
+  const [addTagModalVisible, setAddTagModalVisible] = useState(false);
+  const [newTag, setNewTag] = useState('');
   const [form] = Form.useForm();
   const [taskForm] = Form.useForm();
 
@@ -72,6 +74,26 @@ const CustomerDetail = () => {
       setLoading(false);
     }
   };
+  // 添加标签
+  const handleConfirmAddTag = async () => {
+    const value = newTag.trim();
+    if (!value) {
+      message.warning('请输入标签');
+      return;
+    }
+    try {
+      const existing = customer?.tags || [];
+      const nextTags = Array.from(new Set([...(existing), value]));
+      await customerApi.updateCustomer(customer!.id, { tags: nextTags });
+      message.success('标签已添加');
+      setAddTagModalVisible(false);
+      setNewTag('');
+      fetchCustomerDetail();
+    } catch (error) {
+      message.error('添加标签失败');
+    }
+  };
+
 
   useEffect(() => {
     fetchCustomerDetail();
@@ -80,7 +102,15 @@ const CustomerDetail = () => {
   // 添加跟进记录
   const handleAddFollowUp = async () => {
     try {
-      // 这里应该调用API添加跟进记录
+      const values = await form.validateFields();
+      await customerApi.addFollowUpRecord({
+        customerId: id!,
+        type: values.type,
+        content: values.content,
+        result: values.result || '',
+        nextAction: values.nextAction || '',
+        createBy: customer?.assignedTo || '系统',
+      });
       message.success('跟进记录添加成功');
       setFollowUpModalVisible(false);
       form.resetFields();
@@ -93,7 +123,19 @@ const CustomerDetail = () => {
   // 添加任务
   const handleAddTask = async () => {
     try {
-      // 这里应该调用API添加任务
+      const values = await taskForm.validateFields();
+      const dueDateValue = values.dueDate;
+      const dueDate = dueDateValue?.format ? dueDateValue.format('YYYY-MM-DD') : new Date(dueDateValue).toISOString().slice(0, 10);
+      await customerApi.addTask({
+        customerId: id!,
+        title: values.title,
+        description: values.description || '',
+        type: values.type,
+        priority: values.priority,
+        status: '待处理',
+        assignedTo: values.assignedTo,
+        dueDate,
+      });
       message.success('任务添加成功');
       setTaskModalVisible(false);
       taskForm.resetFields();
@@ -277,7 +319,8 @@ const CustomerDetail = () => {
                 ))}
               </Space>
             </Card>
-            <Card title="客户标签" size="small" style={{ marginTop: '16px' }}>
+            {/* 添加标签 */}
+            <Card title="客户标签" size="small" style={{ marginTop: '16px' }} extra={<Button type="link" onClick={() => setAddTagModalVisible(true)} style={{ padding: 0 }}>＋</Button>}>
               <Space wrap>
                 {(customer.tags || []).map(tag => (
                   <Tag key={tag} color="green">{tag}</Tag>
@@ -314,8 +357,9 @@ const CustomerDetail = () => {
           <TabPane tab="跟进记录" key="followUp">
             <div style={{ marginBottom: '16px' }}>
               <Button 
-                type="primary" 
-                icon={<PlusOutlined />}
+                type="link"
+                style={{ color: '#69b1ff' }}
+                icon={<PlusOutlined style={{ color: '#69b1ff' }} />}
                 onClick={() => setFollowUpModalVisible(true)}
               >
                 添加跟进记录
@@ -333,8 +377,9 @@ const CustomerDetail = () => {
           <TabPane tab="任务管理" key="tasks">
             <div style={{ marginBottom: '16px' }}>
               <Button 
-                type="primary" 
-                icon={<PlusOutlined />}
+                type="link"
+                style={{ color: '#69b1ff' }}
+                icon={<PlusOutlined style={{ color: '#69b1ff' }} />}
                 onClick={() => setTaskModalVisible(true)}
               >
                 添加任务
@@ -408,6 +453,24 @@ const CustomerDetail = () => {
             </Space>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 添加标签模态框 */}
+      <Modal
+        title="添加标签"
+        open={addTagModalVisible}
+        onCancel={() => { setAddTagModalVisible(false); setNewTag(''); }}
+        onOk={handleConfirmAddTag}
+        okText="添加"
+        cancelText="取消"
+        okButtonProps={{ type: 'default' }}
+      >
+        <Input
+          placeholder="请输入新标签"
+          value={newTag}
+          onChange={(e) => setNewTag(e.target.value)}
+          onPressEnter={handleConfirmAddTag}
+        />
       </Modal>
 
       {/* 添加任务模态框 */}
