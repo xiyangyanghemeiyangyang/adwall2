@@ -1,3 +1,13 @@
+## Realtime Node worker server
+
+Run realtime simulation server:
+
+```bash
+npm run server
+```
+
+It starts a WebSocket at ws://localhost:8080 and broadcasts computed updates.
+
 # CrmPlus - B 端管理系统
 
 基于 React 和 TypeScript 开发的 B 端 CRM 管理系统前端项目。
