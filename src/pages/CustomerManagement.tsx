@@ -32,7 +32,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { customerApi, type Customer } from '../api/customerData';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { Search } = Input;
 const { Option } = Select;
 
@@ -42,7 +42,7 @@ const CustomerManagement = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 4,
     total: 0
   });
   const [searchText, setSearchText] = useState('');
@@ -431,10 +431,10 @@ const CustomerManagement = () => {
           loading={loading}
           pagination={{
             ...pagination,
-            showSizeChanger: true,
+            showSizeChanger: false,
             showQuickJumper: true,
             showTotal: (total, range) => 
-              `第 ${range[0]}-${range[1]} 条/共 ${total} 条`,
+              `第 ${range[0]}-${range[1]} 条/共 ${total} 条，共 ${Math.ceil(total / pagination.pageSize)} 页`,
           }}
           onChange={handleTableChange}
           scroll={{ x: 1000 }}

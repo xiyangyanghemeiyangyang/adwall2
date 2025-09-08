@@ -318,7 +318,25 @@ const defaultMockTasks: Task[] = [
 export const mockTasks: Task[] = loadTasks(defaultMockTasks);
 
 // 模拟客户统计数据
-export const mockCustomerStats: CustomerStats[] = [
+const STORAGE_STATS = 'crm_stats';
+
+const saveStats = (data: CustomerStats[]) => {
+  try { localStorage.setItem(STORAGE_STATS, JSON.stringify(data)); } catch {}
+};
+
+const loadStats = (seed: CustomerStats[]): CustomerStats[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_STATS);
+    if (raw) {
+      const parsed = JSON.parse(raw) as CustomerStats[];
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {}
+  saveStats(seed);
+  return seed;
+};
+
+export const mockCustomerStats: CustomerStats[] = loadStats([
   {
     customerId: '1',
     loginCount: 15,
@@ -346,7 +364,7 @@ export const mockCustomerStats: CustomerStats[] = [
     interactionCount: 2,
     lastLoginTime: '2024-01-22 11:00:00'
   }
-];
+]);
 
 // API 模拟函数
 export const customerApi = {
@@ -498,14 +516,40 @@ export const customerApi = {
 
   // 获取客户统计
   getCustomerStats: (customerId: string) => {
-    return new Promise<CustomerStats>((resolve, reject) => {
+    return new Promise<CustomerStats>((resolve) => {
       setTimeout(() => {
         const stats = mockCustomerStats.find(stat => stat.customerId === customerId);
         if (stats) {
           resolve(stats);
         } else {
-          reject(new Error('统计数据不存在'));
+          // 若不存在，为该客户初始化一个空的统计数据
+          const newStats: CustomerStats = {
+            customerId,
+            loginCount: 0,
+            purchaseHistory: [],
+            interactionCount: 0,
+            lastLoginTime: new Date().toISOString()
+          };
+          mockCustomerStats.push(newStats);
+          saveStats(mockCustomerStats);
+          resolve(newStats);
         }
+      }, 300);
+    });
+  },
+
+  // 添加购买记录
+  addPurchase: (customerId: string, purchase: { product: string; amount: number; date: string }) => {
+    return new Promise<boolean>((resolve) => {
+      setTimeout(() => {
+        const stats = mockCustomerStats.find(stat => stat.customerId === customerId);
+        if (!stats) {
+          resolve(false);
+          return;
+        }
+        stats.purchaseHistory.unshift(purchase);
+        saveStats(mockCustomerStats);
+        resolve(true);
       }, 300);
     });
   },

@@ -49,6 +49,8 @@ const CustomerDetail = () => {
   const [newTag, setNewTag] = useState('');
   const [form] = Form.useForm();
   const [taskForm] = Form.useForm();
+  const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
+  const [purchaseForm] = Form.useForm();
 
   // 获取客户详情
   const fetchCustomerDetail = async () => {
@@ -142,6 +144,26 @@ const CustomerDetail = () => {
       fetchCustomerDetail();
     } catch (error) {
       message.error('添加任务失败');
+    }
+  };
+
+  // 添加购买记录
+  const handleAddPurchase = async () => {
+    try {
+      const values = await purchaseForm.validateFields();
+      const dateValue = values.date;
+      const date = dateValue?.format ? dateValue.format('YYYY-MM-DD') : new Date(dateValue).toISOString().slice(0, 10);
+      await customerApi.addPurchase(id!, {
+        product: values.product,
+        amount: Number(values.amount),
+        date
+      });
+      message.success('购买记录添加成功');
+      setPurchaseModalVisible(false);
+      purchaseForm.resetFields();
+      fetchCustomerDetail();
+    } catch (error) {
+      message.error('添加购买记录失败');
     }
   };
 
@@ -395,6 +417,16 @@ const CustomerDetail = () => {
           </TabPane>
           
           <TabPane tab="购买历史" key="purchase">
+            <div style={{ marginBottom: '16px' }}>
+              <Button 
+                type="link"
+                style={{ color: '#69b1ff' }}
+                icon={<PlusOutlined style={{ color: '#69b1ff' }} />}
+                onClick={() => setPurchaseModalVisible(true)}
+              >
+                添加购买
+              </Button>
+            </div>
             {stats && stats.purchaseHistory.length > 0 ? (
               <Table
                 dataSource={stats.purchaseHistory}
@@ -515,6 +547,36 @@ const CustomerDetail = () => {
                 保存
               </Button>
               <Button onClick={() => setTaskModalVisible(false)}>
+                取消
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 添加购买模态框 */}
+      <Modal
+        title="添加购买"
+        open={purchaseModalVisible}
+        onCancel={() => setPurchaseModalVisible(false)}
+        footer={null}
+      >
+        <Form form={purchaseForm} onFinish={handleAddPurchase} layout="vertical">
+          <Form.Item name="product" label="产品名称" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="amount" label="金额" rules={[{ required: true }]}>
+            <Input type="number" min={0} />
+          </Form.Item>
+          <Form.Item name="date" label="购买日期" rules={[{ required: true }]}>
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="link" htmlType="submit" style={{ color: '#69b1ff' }}>
+                保存
+              </Button>
+              <Button onClick={() => setPurchaseModalVisible(false)}>
                 取消
               </Button>
             </Space>
