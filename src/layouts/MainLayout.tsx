@@ -63,7 +63,7 @@ const MainLayout = () => {
           label: '渠道管理',
         },
         {
-          key: 'product-description',
+          key: 'data-management',
           label: '数据管理',
         },
       ],

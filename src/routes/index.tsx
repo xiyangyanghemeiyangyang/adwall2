@@ -5,6 +5,8 @@ import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
 import CustomerManagement from '../pages/CustomerManagement';
 import CustomerDetail from '../pages/CustomerDetail';
+import DataManagement from '../pages/DataManagement';
+import DataDetail from '../pages/DataDetail';
 // import AccountManagement from '../pages/AccountManagement';
 // import ContentReview from '../pages/ContentReview';
 // import RegionManagement from '../pages/RegionManagement';
@@ -36,6 +38,14 @@ const router = createBrowserRouter([
       {
         path: 'customer-management/:id',
         element: <CustomerDetail />,
+      },
+      {
+        path: 'data-management',
+        element: <DataManagement />,
+      },
+      {
+        path: 'data-management/:customerId',
+        element: <DataDetail />,
       },
       // {
       //   path: 'account-management',

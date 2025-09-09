@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Tabs, Checkbox, Space, Typography, Row, Col, QRCode } from 'antd';
+import { useState } from 'react';
+import { Form, Input, Button, message, Tabs, Checkbox, Typography, QRCode } from 'antd';
 import { UserOutlined, LockOutlined, MobileOutlined, MailOutlined, QrcodeOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
@@ -313,17 +313,6 @@ const LoginButton = styled(Button)`
   }
 `;
 
-const FooterLinks = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 16px;
-  color: #999;
-  
-  a {
-    color: #2468f2;
-    margin: 0 8px;
-  }
-`;
 
 const RegisterLink = styled.div`
   display: flex;
@@ -387,15 +376,7 @@ const Login = () => {
   const [showQrCode, setShowQrCode] = useState(false);
 
   // 模拟动画效果
-  const [animationComplete, setAnimationComplete] = useState(false);
   
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimationComplete(true);
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, []);
 
   const onLoginFinish = (values: LoginFormValues) => {
     setLoading(true);
@@ -414,7 +395,7 @@ const Login = () => {
     }, 1000);
   };
 
-  const onRegisterFinish = (values: RegisterFormValues) => {
+  const onRegisterFinish = (_values: RegisterFormValues) => {
     setRegisterLoading(true);
     
     // 模拟注册请求
