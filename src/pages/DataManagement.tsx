@@ -13,7 +13,6 @@ import {
   Col,
   Statistic,
   message,
-  DatePicker,
   Tooltip
 } from 'antd';
 import { 
@@ -31,12 +30,13 @@ import { dataManagementApi, type CustomerSummary } from '../api/dataManagement';
 const { Title } = Typography;
 const { Search } = Input;
 const { Option } = Select;
-const { RangePicker } = DatePicker;
+ 
 
 const DataManagement = () => {
   const navigate = useNavigate();
   const [customerSummaries, setCustomerSummaries] = useState<CustomerSummary[]>([]);
   const [loading, setLoading] = useState(false);
+  // 初始分页
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 5,
@@ -47,7 +47,7 @@ const DataManagement = () => {
   const [cityFilter, setCityFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [campaignTypeFilter, setCampaignTypeFilter] = useState<string | undefined>(undefined);
-  const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+  const [dateRange] = useState<[string, string] | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [statistics, setStatistics] = useState({
     totalClicks: 0,
@@ -61,10 +61,10 @@ const DataManagement = () => {
 
   // 获取客户汇总数据列表
   const fetchCustomerSummaries = async (
-    page = 1, 
-    pageSize = 5, 
-    search = '', 
-    region = '', 
+    page = 1,
+    pageSize = 5, // 当前显示数量
+    search = '',
+    region = '',
     city = '',
     status = '',
     campaignType = '',
@@ -86,6 +86,7 @@ const DataManagement = () => {
       setPagination(prev => ({
         ...prev,
         current: page,
+        pageSize: pageSize,
         total: result.total
       }));
     } catch (error) {
@@ -104,14 +105,69 @@ const DataManagement = () => {
       message.error('获取统计数据失败');
     }
   };
+// 放在 useState 下面、useEffect 之前
+useEffect(() => {
+  const saved = JSON.parse(localStorage.getItem('dm_state') || '{}');
+  setPagination(prev => ({
+    ...prev,
+    current: saved.current || 1,
+    pageSize: saved.pageSize || prev.pageSize
+  }));
+  setSearchText(saved.searchText || '');
+  setRegionFilter(saved.regionFilter ?? undefined);
+  setCityFilter(saved.cityFilter || '');
+  setStatusFilter(saved.statusFilter ?? undefined);
+  setCampaignTypeFilter(saved.campaignTypeFilter ?? undefined);
 
-  useEffect(() => {
-    fetchCustomerSummaries();
-    fetchStatistics();
-  }, []);
+  fetchCustomerSummaries(
+    saved.current || 1,
+    saved.pageSize || pagination.pageSize,
+    saved.searchText || '',
+    saved.regionFilter || '',
+    saved.cityFilter || '',
+    saved.statusFilter || '',
+    saved.campaignTypeFilter || '',
+    undefined
+  );
+  fetchStatistics();
+
+
+  // 放在 useEffect 里
+  
+  
+  // 建立 WebSocket 订阅实时统计
+  let ws: WebSocket | null = null;
+  try {
+    ws = new WebSocket('ws://localhost:8080');
+    ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg.type === 'result' && msg.data) {
+          setStatistics((prev) => ({
+            ...prev,
+            ...msg.data
+          }));
+        }
+      } catch {}
+    };
+  } catch {}
+  return () => {
+    try { if (ws) ws.close(); } catch {}
+  };
+}, []);
 
   // 处理搜索
   const handleSearch = (value: string) => {
+    const next = {
+      current: 1,
+      pageSize: pagination.pageSize,
+      searchText: value,
+      regionFilter,
+      cityFilter,
+      statusFilter,
+      campaignTypeFilter
+    };
+    localStorage.setItem('dm_state', JSON.stringify(next));
     setSearchText(value);
     fetchCustomerSummaries(1, pagination.pageSize, value, regionFilter || '', cityFilter, statusFilter || '', campaignTypeFilter || '', dateRange || undefined);
   };
@@ -147,6 +203,18 @@ const DataManagement = () => {
   
   // 处理表格分页
   const handleTableChange = (pagination: any) => {
+    const { current, pageSize } = pagination;
+    const next = {
+      current,
+      pageSize,
+      searchText,
+      regionFilter,
+      cityFilter,
+      statusFilter,
+      campaignTypeFilter
+    };
+    localStorage.setItem('dm_state', JSON.stringify(next));
+    setPagination(prev => ({ ...prev, current, pageSize }));
     fetchCustomerSummaries(pagination.current, pagination.pageSize, searchText, regionFilter || '', cityFilter, statusFilter || '', campaignTypeFilter || '', dateRange || undefined);
   };
 
@@ -412,9 +480,7 @@ const DataManagement = () => {
           pagination={{
             ...pagination,
             showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total, range) => 
-              `第 ${range[0]}-${range[1]} 条/共 ${total} 条，共 ${Math.ceil(total / pagination.pageSize)} 页`,
+            pageSizeOptions: ['2','3','4','5'] // ← 可选
           }}
           onChange={handleTableChange}
           scroll={{ x: 1200 }}
