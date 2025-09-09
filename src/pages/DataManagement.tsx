@@ -43,10 +43,10 @@ const DataManagement = () => {
     total: 0
   });
   const [searchText, setSearchText] = useState('');
-  const [regionFilter, setRegionFilter] = useState<string>('');
+  const [regionFilter, setRegionFilter] = useState<string | undefined>(undefined);
   const [cityFilter, setCityFilter] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [campaignTypeFilter, setCampaignTypeFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [campaignTypeFilter, setCampaignTypeFilter] = useState<string | undefined>(undefined);
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
   const [searchActive, setSearchActive] = useState(false);
   const [statistics, setStatistics] = useState({
@@ -113,27 +113,33 @@ const DataManagement = () => {
   // 处理搜索
   const handleSearch = (value: string) => {
     setSearchText(value);
-    fetchCustomerSummaries(1, pagination.pageSize, value, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
+    fetchCustomerSummaries(1, pagination.pageSize, value, regionFilter || '', cityFilter, statusFilter || '', campaignTypeFilter || '', dateRange || undefined);
   };
 
   // 处理筛选
-  const handleFilterChange = (type: string, value: string) => {
+  const handleFilterChange = (type: string, value: string | undefined) => {
     switch (type) {
       case 'region':
         setRegionFilter(value);
-        fetchCustomerSummaries(1, pagination.pageSize, searchText, value, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
+        fetchCustomerSummaries(1, pagination.pageSize, searchText, value || '', cityFilter, statusFilter || '', campaignTypeFilter || '', dateRange || undefined);
         break;
       case 'city':
-        setCityFilter(value);
-        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, value, statusFilter, campaignTypeFilter, dateRange || undefined);
-        break;
-      case 'status':
-        setStatusFilter(value);
-        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, value, campaignTypeFilter, dateRange || undefined);
+        setCityFilter(value || '');
+        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter || '', value || '', statusFilter || '', campaignTypeFilter || '', dateRange || undefined);
         break;
       case 'campaignType':
         setCampaignTypeFilter(value);
-        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, value, dateRange || undefined);
+        fetchCustomerSummaries(
+          1, pagination.pageSize, searchText, regionFilter || '', cityFilter || '', statusFilter || '',
+          value || '', dateRange || undefined
+        );
+        break;
+      case 'status':
+        setStatusFilter(value);
+        fetchCustomerSummaries(
+          1, pagination.pageSize, searchText, regionFilter || '', cityFilter || '', value || '',
+          campaignTypeFilter || '', dateRange || undefined
+        );
         break;
     }
   };
@@ -141,7 +147,7 @@ const DataManagement = () => {
   
   // 处理表格分页
   const handleTableChange = (pagination: any) => {
-    fetchCustomerSummaries(pagination.current, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
+    fetchCustomerSummaries(pagination.current, pagination.pageSize, searchText, regionFilter || '', cityFilter, statusFilter || '', campaignTypeFilter || '', dateRange || undefined);
   };
 
   
@@ -354,7 +360,8 @@ const DataManagement = () => {
               allowClear
               style={{ width: '100%' }}
               value={regionFilter}
-              onChange={(value) => handleFilterChange('region', value)}
+              onChange={(value) => handleFilterChange('region', value as string | undefined)}
+              onClear={() => handleFilterChange('region', undefined as unknown as string)}
             >
               <Option value="华北">华北</Option>
               <Option value="华东">华东</Option>
@@ -371,7 +378,7 @@ const DataManagement = () => {
               allowClear
               style={{ width: '100%' }}
               value={campaignTypeFilter}
-              onChange={(value) => handleFilterChange('campaignType', value)}
+              onChange={(v) => handleFilterChange('campaignType', v)}
             >
               <Option value="搜索推广">搜索推广</Option>
               <Option value="信息流推广">信息流推广</Option>
@@ -385,7 +392,7 @@ const DataManagement = () => {
               allowClear
               style={{ width: '100%' }}
               value={statusFilter}
-              onChange={(value) => handleFilterChange('status', value)}
+              onChange={(v) => handleFilterChange('status', v)}
             >
               <Option value="正常">正常</Option>
               <Option value="暂停">暂停</Option>

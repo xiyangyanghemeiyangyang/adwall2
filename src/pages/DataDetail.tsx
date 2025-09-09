@@ -431,144 +431,99 @@ const DataDetail = () => {
         </Row>
       </div>
 
-      {/* 图表区域 */}
-      <Row gutter={[16, 16]}>
-        {/* 柱状图 - 区域数据对比 */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title={
-              <Space>
-                <BarChartOutlined />
-                区域数据对比
-              </Space>
-            }
-            style={{ height: '400px' }}
-          >
-            <ReactECharts 
-              option={getBarChartOption()} 
-              style={{ height: '300px' }}
-            />
-          </Card>
-        </Col>
-
-        {/* 折线图 - 时间趋势 */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title={
-              <Space>
-                <LineChartOutlined />
-                数据趋势分析
-              </Space>
-            }
-            style={{ height: '400px' }}
-          >
-            <ReactECharts 
-              option={getLineChartOption()} 
-              style={{ height: '300px' }}
-            />
-          </Card>
-        </Col>
-
-        {/* 饼图 - 推广类型分布 */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title={
-              <Space>
-                <PieChartOutlined />
-                推广类型分布
-              </Space>
-            }
-            style={{ height: '400px' }}
-          >
-            <ReactECharts 
-              option={getPieChartOption()} 
-              style={{ height: '300px' }}
-            />
-          </Card>
-        </Col>
-
-        {/* 区域收入分布图 */}
-        <Col xs={24} lg={12}>
-          <Card 
-            title={
-              <Space>
-                <BarChartOutlined />
-                区域收入分布
-              </Space>
-            }
-            style={{ height: '400px' }}
-          >
-            <ReactECharts 
-              option={getRegionChartOption()} 
-              style={{ height: '300px' }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* 明细切换 */}
-      <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-        <Col span={24}>
-          <Card>
-            <Tabs
-              defaultActiveKey="region"
-              items={[
-                {
-                  key: 'region',
-                  label: '区域详细数据',
-                  children: (
-                    <Row gutter={[16, 16]}>
-                      {dataDetail.regionData.map((region, index) => (
-                        <Col xs={24} sm={12} md={8} lg={6} key={index}>
-                          <Card size="small" style={{ textAlign: 'center' }}>
-                            <div style={{ marginBottom: '8px' }}>
-                              <Tag color="blue">{region.region}</Tag>
+      
+<Row gutter={[16, 16]}>
+  <Col span={24}>
+    <Card>
+      <Tabs
+        defaultActiveKey="region-compare"
+        items={[
+          {
+            key: 'region-compare',
+            label: '区域数据对比',
+            children: (
+              <ReactECharts option={getBarChartOption()} style={{ height: '360px' }} />
+            ),
+          },
+          {
+            key: 'trend',
+            label: '数据趋势分析',
+            children: (
+              <ReactECharts option={getLineChartOption()} style={{ height: '360px' }} />
+            ),
+          },
+          {
+            key: 'campaign',
+            label: '推广类型分布',
+            children: (
+              <ReactECharts option={getPieChartOption()} style={{ height: '360px' }} />
+            ),
+          },
+          {
+            key: 'region-revenue',
+            label: '区域收入分布',
+            children: (
+              <ReactECharts option={getRegionChartOption()} style={{ height: '360px' }} />
+            ),
+          },
+          {
+            key: 'region-detail',
+            label: '区域详细数据',
+            children: (
+              <Row gutter={[16, 16]}>
+                {dataDetail.regionData.map((region, index) => (
+                  <Col xs={24} sm={12} md={8} lg={6} key={index}>
+                    <Card size="small" style={{ textAlign: 'center' }}>
+                      <div style={{ marginBottom: '8px' }}>
+                        <Tag color="blue">{region.region}</Tag>
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        <div>点击量: {region.totalClicks.toLocaleString()}</div>
+                        <div>花费: ¥{region.totalCost.toLocaleString()}</div>
+                        <div>收入: ¥{region.totalRevenue.toLocaleString()}</div>
+                        <div>转化率: {region.avgConversionRate.toFixed(2)}%</div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            ),
+          },
+          ...(dataDetail.cityData && dataDetail.cityData.length > 0
+            ? [{
+                key: 'city-detail',
+                label: '城市详细数据',
+                children: (
+                  <Row gutter={[16, 16]}>
+                    {dataDetail.cityData.map((city, index) => (
+                      <Col xs={24} sm={12} md={8} lg={6} key={index}>
+                        <Card size="small" style={{ textAlign: 'center' }}>
+                          <div style={{ marginBottom: '8px' }}>
+                            <Tag color="green">{city.city}</Tag>
+                            <div style={{ fontSize: '10px', color: '#999', marginTop: '2px' }}>
+                              {city.region}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#666' }}>
-                              <div>点击量: {region.totalClicks.toLocaleString()}</div>
-                              <div>花费: ¥{region.totalCost.toLocaleString()}</div>
-                              <div>收入: ¥{region.totalRevenue.toLocaleString()}</div>
-                              <div>转化率: {region.avgConversionRate.toFixed(2)}%</div>
-                            </div>
-                          </Card>
-                        </Col>
-                      ))}
-                    </Row>
-                  ),
-                },
-                ...(dataDetail.cityData && dataDetail.cityData.length > 0
-                  ? [{
-                      key: 'city',
-                      label: '城市详细数据',
-                      children: (
-                        <Row gutter={[16, 16]}>
-                          {dataDetail.cityData.map((city, index) => (
-                            <Col xs={24} sm={12} md={8} lg={6} key={index}>
-                              <Card size="small" style={{ textAlign: 'center' }}>
-                                <div style={{ marginBottom: '8px' }}>
-                                  <Tag color="green">{city.city}</Tag>
-                                  <div style={{ fontSize: '10px', color: '#999', marginTop: '2px' }}>
-                                    {city.region}
-                                  </div>
-                                </div>
-                                <div style={{ fontSize: '12px', color: '#666' }}>
-                                  <div>点击量: {city.totalClicks.toLocaleString()}</div>
-                                  <div>花费: ¥{city.totalCost.toLocaleString()}</div>
-                                  <div>收入: ¥{city.totalRevenue.toLocaleString()}</div>
-                                  <div>转化率: {city.avgConversionRate.toFixed(2)}%</div>
-                                </div>
-                              </Card>
-                            </Col>
-                          ))}
-                        </Row>
-                      ),
-                    }]
-                  : [])
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#666' }}>
+                            <div>点击量: {city.totalClicks.toLocaleString()}</div>
+                            <div>花费: ¥{city.totalCost.toLocaleString()}</div>
+                            <div>收入: ¥{city.totalRevenue.toLocaleString()}</div>
+                            <div>转化率: {city.avgConversionRate.toFixed(2)}%</div>
+                          </div>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                ),
+              }]
+            : [])
+        ]}
+      />
+    </Card>
+  </Col>
+</Row>
+
+     
     </div>
   );
 };
