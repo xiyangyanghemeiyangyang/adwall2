@@ -26,7 +26,7 @@ import {
   EnvironmentOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { dataManagementApi, type DataRecord } from '../api/dataManagement';
+import { dataManagementApi, type CustomerSummary } from '../api/dataManagement';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -35,7 +35,7 @@ const { RangePicker } = DatePicker;
 
 const DataManagement = () => {
   const navigate = useNavigate();
-  const [dataRecords, setDataRecords] = useState<DataRecord[]>([]);
+  const [customerSummaries, setCustomerSummaries] = useState<CustomerSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
@@ -48,6 +48,7 @@ const DataManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [campaignTypeFilter, setCampaignTypeFilter] = useState<string>('');
   const [dateRange, setDateRange] = useState<[string, string] | null>(null);
+  const [searchActive, setSearchActive] = useState(false);
   const [statistics, setStatistics] = useState({
     totalClicks: 0,
     totalCost: 0,
@@ -58,8 +59,8 @@ const DataManagement = () => {
     totalRegions: 0
   });
 
-  // 获取数据列表
-  const fetchDataRecords = async (
+  // 获取客户汇总数据列表
+  const fetchCustomerSummaries = async (
     page = 1, 
     pageSize = 10, 
     search = '', 
@@ -71,7 +72,7 @@ const DataManagement = () => {
   ) => {
     setLoading(true);
     try {
-      const result = await dataManagementApi.getDataRecords({
+      const result = await dataManagementApi.getCustomerSummaries({
         page,
         pageSize,
         search,
@@ -81,14 +82,14 @@ const DataManagement = () => {
         campaignType,
         dateRange
       });
-      setDataRecords(result.data);
+      setCustomerSummaries(result.data);
       setPagination(prev => ({
         ...prev,
         current: page,
         total: result.total
       }));
     } catch (error) {
-      message.error('获取数据列表失败');
+      message.error('获取客户数据失败');
     } finally {
       setLoading(false);
     }
@@ -105,14 +106,14 @@ const DataManagement = () => {
   };
 
   useEffect(() => {
-    fetchDataRecords();
+    fetchCustomerSummaries();
     fetchStatistics();
   }, []);
 
   // 处理搜索
   const handleSearch = (value: string) => {
     setSearchText(value);
-    fetchDataRecords(1, pagination.pageSize, value, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
+    fetchCustomerSummaries(1, pagination.pageSize, value, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
   };
 
   // 处理筛选
@@ -120,19 +121,19 @@ const DataManagement = () => {
     switch (type) {
       case 'region':
         setRegionFilter(value);
-        fetchDataRecords(1, pagination.pageSize, searchText, value, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
+        fetchCustomerSummaries(1, pagination.pageSize, searchText, value, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
         break;
       case 'city':
         setCityFilter(value);
-        fetchDataRecords(1, pagination.pageSize, searchText, regionFilter, value, statusFilter, campaignTypeFilter, dateRange || undefined);
+        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, value, statusFilter, campaignTypeFilter, dateRange || undefined);
         break;
       case 'status':
         setStatusFilter(value);
-        fetchDataRecords(1, pagination.pageSize, searchText, regionFilter, cityFilter, value, campaignTypeFilter, dateRange || undefined);
+        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, value, campaignTypeFilter, dateRange || undefined);
         break;
       case 'campaignType':
         setCampaignTypeFilter(value);
-        fetchDataRecords(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, value, dateRange || undefined);
+        fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, value, dateRange || undefined);
         break;
     }
   };
@@ -141,45 +142,53 @@ const DataManagement = () => {
   const handleDateRangeChange = (dates: any, dateStrings: [string, string]) => {
     if (dates) {
       setDateRange(dateStrings);
-      fetchDataRecords(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateStrings);
+      fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateStrings);
     } else {
       setDateRange(null);
-      fetchDataRecords(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter);
+      fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter);
     }
   };
 
   // 处理表格分页
   const handleTableChange = (pagination: any) => {
-    fetchDataRecords(pagination.current, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
+    fetchCustomerSummaries(pagination.current, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
   };
+
+  
 
   // 查看数据详情
   const handleViewDetail = (customerId: string) => {
     navigate(`/data-management/${customerId}`);
   };
 
-  // 表格列定义
-  const columns: ColumnsType<DataRecord> = [
+  // 主表格列定义
+  const columns: ColumnsType<CustomerSummary> = [
     {
       title: '客户信息',
       key: 'customer',
       render: (_, record) => (
         <div>
-          <div style={{ fontWeight: 'bold' }}>{record.customerName}</div>
+          <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{record.customerName}</div>
           <div style={{ fontSize: '12px', color: '#666' }}>
-            <UserOutlined /> {record.customerId}
+            <UserOutlined /> ID: {record.customerId}
           </div>
         </div>
       ),
     },
     {
-      title: '推广区域',
-      key: 'location',
+      title: '推广覆盖',
+      key: 'coverage',
       render: (_, record) => (
         <div>
-          <div style={{ fontWeight: 'bold' }}>{record.region}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            <EnvironmentOutlined /> {record.city}
+          <div style={{ marginBottom: '4px' }}>
+            <EnvironmentOutlined style={{ marginRight: '4px', color: '#1677ff' }} />
+            <span style={{ fontWeight: 'bold' }}>{record.totalRegions}</span>
+            <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>区域</span>
+          </div>
+          <div>
+            <EnvironmentOutlined style={{ marginRight: '4px', color: '#52c41a' }} />
+            <span style={{ fontWeight: 'bold' }}>{record.totalCities}</span>
+            <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>城市</span>
           </div>
         </div>
       ),
@@ -191,12 +200,12 @@ const DataManagement = () => {
         <div>
           <div style={{ marginBottom: '4px' }}>
             <AimOutlined style={{ marginRight: '4px', color: '#1677ff' }} />
-            <span style={{ fontWeight: 'bold' }}>{record.clickCount.toLocaleString()}</span>
+            <span style={{ fontWeight: 'bold' }}>{record.totalClicks.toLocaleString()}</span>
             <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>点击</span>
           </div>
           <div>
-            <DollarOutlined style={{ marginRight: '4px', color: '#52c41a' }} />
-            <span style={{ fontWeight: 'bold' }}>¥{record.cost.toLocaleString()}</span>
+            <DollarOutlined style={{ marginRight: '4px', color: '#faad14' }} />
+            <span style={{ fontWeight: 'bold' }}>¥{record.totalCost.toLocaleString()}</span>
             <span style={{ fontSize: '12px', color: '#666', marginLeft: '4px' }}>花费</span>
           </div>
         </div>
@@ -204,52 +213,40 @@ const DataManagement = () => {
     },
     {
       title: '转化率',
-      dataIndex: 'conversionRate',
-      key: 'conversionRate',
+      dataIndex: 'avgConversionRate',
+      key: 'avgConversionRate',
       render: (rate: number) => (
         <Tag color={rate > 5 ? 'green' : rate > 2 ? 'orange' : 'red'}>
           {rate.toFixed(2)}%
         </Tag>
       ),
-      sorter: (a, b) => a.conversionRate - b.conversionRate,
+      sorter: (a, b) => a.avgConversionRate - b.avgConversionRate,
     },
     {
       title: '收入',
-      dataIndex: 'revenue',
-      key: 'revenue',
+      dataIndex: 'totalRevenue',
+      key: 'totalRevenue',
       render: (revenue: number) => (
         <span style={{ fontWeight: 'bold', color: '#52c41a' }}>
           ¥{revenue.toLocaleString()}
         </span>
       ),
-      sorter: (a, b) => a.revenue - b.revenue,
+      sorter: (a, b) => a.totalRevenue - b.totalRevenue,
     },
     {
-      title: '推广类型',
-      dataIndex: 'campaignType',
-      key: 'campaignType',
-      render: (type: DataRecord['campaignType']) => {
-        const colorMap: Record<string, string> = {
-          '搜索推广': 'blue',
-          '信息流推广': 'green',
-          '品牌推广': 'purple',
-          '其他': 'default',
-        };
-        return <Tag color={colorMap[type]}>{type}</Tag>;
-      },
-      filters: [
-        { text: '搜索推广', value: '搜索推广' },
-        { text: '信息流推广', value: '信息流推广' },
-        { text: '品牌推广', value: '品牌推广' },
-        { text: '其他', value: '其他' },
-      ],
-      onFilter: (value, record) => record.campaignType === value,
+      title: '推广数',
+      dataIndex: 'totalCampaigns',
+      key: 'totalCampaigns',
+      render: (count: number) => (
+        <Tag color="blue">{count} 个</Tag>
+      ),
+      sorter: (a, b) => a.totalCampaigns - b.totalCampaigns,
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      render: (status: DataRecord['status']) => {
+      render: (status: CustomerSummary['status']) => {
         const colorMap: Record<string, string> = {
           '正常': 'green',
           '暂停': 'orange',
@@ -257,19 +254,13 @@ const DataManagement = () => {
         };
         return <Tag color={colorMap[status]}>{status}</Tag>;
       },
-      filters: [
-        { text: '正常', value: '正常' },
-        { text: '暂停', value: '暂停' },
-        { text: '异常', value: '异常' },
-      ],
-      onFilter: (value, record) => record.status === value,
     },
     {
-      title: '日期',
-      dataIndex: 'date',
-      key: 'date',
+      title: '最后活跃',
+      dataIndex: 'lastActiveDate',
+      key: 'lastActiveDate',
       render: (date: string) => new Date(date).toLocaleDateString(),
-      sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+      sorter: (a, b) => new Date(a.lastActiveDate).getTime() - new Date(b.lastActiveDate).getTime(),
     },
     {
       title: '操作',
@@ -289,6 +280,8 @@ const DataManagement = () => {
       ),
     },
   ];
+
+  
 
   return (
     <div className="data-management">
@@ -352,7 +345,15 @@ const DataManagement = () => {
             <Search
               placeholder="搜索客户名称、区域、城市"
               allowClear
-              enterButton={<SearchOutlined />}
+              enterButton={
+                <Button
+                  type="text"
+                  onMouseDown={() => setSearchActive(true)}
+                  onMouseUp={() => setSearchActive(false)}
+                  onMouseLeave={() => setSearchActive(false)}
+                  icon={<SearchOutlined style={{ color: searchActive ? '#1677ff' : '#69b1ff' }} />}
+                />
+              }
               size="middle"
               onSearch={handleSearch}
             />
@@ -411,12 +412,12 @@ const DataManagement = () => {
         </Row>
       </Card>
 
-      {/* 数据列表表格 */}
+      {/* 客户数据列表表格 */}
       <Card>
         <Table
           columns={columns}
-          dataSource={dataRecords}
-          rowKey="id"
+          dataSource={customerSummaries}
+          rowKey="customerId"
           loading={loading}
           pagination={{
             ...pagination,

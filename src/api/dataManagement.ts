@@ -65,6 +65,22 @@ export interface CustomerDataDetail {
   }>;
 }
 
+export interface CustomerSummary {
+  customerId: string;
+  customerName: string;
+  totalClicks: number;
+  totalCost: number;
+  totalRevenue: number;
+  totalImpressions: number;
+  avgConversionRate: number;
+  totalCampaigns: number;
+  totalRegions: number;
+  totalCities: number;
+  status: '正常' | '暂停' | '异常';
+  lastActiveDate: string;
+  detailRecords: DataRecord[];
+}
+
 // 模拟数据存储
 const STORAGE_KEY = 'data_management_records';
 
@@ -436,6 +452,121 @@ export const dataManagementApi = {
           totalRegions: uniqueRegions.size
         });
       }, 300);
+    });
+  },
+
+  // 获取客户汇总数据列表
+  getCustomerSummaries: (params?: { 
+    page?: number; 
+    pageSize?: number; 
+    search?: string; 
+    region?: string; 
+    city?: string;
+    status?: string;
+    campaignType?: string;
+    dateRange?: [string, string];
+  }) => {
+    return new Promise<{ data: CustomerSummary[]; total: number }>((resolve) => {
+      setTimeout(() => {
+        let filteredData = [...mockDataRecords];
+        
+        // 应用筛选条件
+        if (params?.search) {
+          filteredData = filteredData.filter(record => 
+            record.customerName.includes(params.search!) ||
+            record.region.includes(params.search!) ||
+            record.city.includes(params.search!)
+          );
+        }
+        
+        if (params?.region) {
+          filteredData = filteredData.filter(record => record.region === params.region);
+        }
+        
+        if (params?.city) {
+          filteredData = filteredData.filter(record => record.city === params.city);
+        }
+        
+        if (params?.status) {
+          filteredData = filteredData.filter(record => record.status === params.status);
+        }
+        
+        if (params?.campaignType) {
+          filteredData = filteredData.filter(record => record.campaignType === params.campaignType);
+        }
+        
+        if (params?.dateRange && params.dateRange.length === 2) {
+          filteredData = filteredData.filter(record => 
+            record.date >= params.dateRange![0] && record.date <= params.dateRange![1]
+          );
+        }
+        
+        // 按客户ID分组并汇总数据
+        const customerMap = new Map<string, CustomerSummary>();
+        
+        filteredData.forEach(record => {
+          const existing = customerMap.get(record.customerId);
+          if (existing) {
+            existing.totalClicks += record.clickCount;
+            existing.totalCost += record.cost;
+            existing.totalRevenue += record.revenue;
+            existing.totalImpressions += record.impressions;
+            existing.detailRecords.push(record);
+            
+            // 更新最后活跃日期
+            if (new Date(record.date) > new Date(existing.lastActiveDate)) {
+              existing.lastActiveDate = record.date;
+            }
+          } else {
+            const uniqueRegions = new Set<string>();
+            const uniqueCities = new Set<string>();
+            const uniqueCampaigns = new Set<string>();
+            
+            filteredData
+              .filter(r => r.customerId === record.customerId)
+              .forEach(r => {
+                uniqueRegions.add(r.region);
+                uniqueCities.add(r.city);
+                uniqueCampaigns.add(r.campaignType);
+              });
+            
+            customerMap.set(record.customerId, {
+              customerId: record.customerId,
+              customerName: record.customerName,
+              totalClicks: record.clickCount,
+              totalCost: record.cost,
+              totalRevenue: record.revenue,
+              totalImpressions: record.impressions,
+              avgConversionRate: record.conversionRate,
+              totalCampaigns: uniqueCampaigns.size,
+              totalRegions: uniqueRegions.size,
+              totalCities: uniqueCities.size,
+              status: record.status,
+              lastActiveDate: record.date,
+              detailRecords: [record]
+            });
+          }
+        });
+        
+        // 计算平均转化率
+        customerMap.forEach(customer => {
+          customer.avgConversionRate = customer.totalClicks > 0 ? 
+            (customer.totalRevenue / customer.totalClicks * 100) : 0;
+        });
+        
+        const customerSummaries = Array.from(customerMap.values());
+        
+        const total = customerSummaries.length;
+        const page = params?.page || 1;
+        const pageSize = params?.pageSize || 10;
+        const start = (page - 1) * pageSize;
+        const end = start + pageSize;
+        
+        resolve({
+          data: customerSummaries.slice(start, end),
+          total
+        });
+      }, 500);
     });
   }
 };
