@@ -39,7 +39,7 @@ const DataManagement = () => {
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0
   });
   const [searchText, setSearchText] = useState('');
@@ -62,7 +62,7 @@ const DataManagement = () => {
   // 获取客户汇总数据列表
   const fetchCustomerSummaries = async (
     page = 1, 
-    pageSize = 10, 
+    pageSize = 5, 
     search = '', 
     region = '', 
     city = '',
@@ -138,17 +138,7 @@ const DataManagement = () => {
     }
   };
 
-  // 处理日期范围筛选
-  const handleDateRangeChange = (dates: any, dateStrings: [string, string]) => {
-    if (dates) {
-      setDateRange(dateStrings);
-      fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateStrings);
-    } else {
-      setDateRange(null);
-      fetchCustomerSummaries(1, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter);
-    }
-  };
-
+  
   // 处理表格分页
   const handleTableChange = (pagination: any) => {
     fetchCustomerSummaries(pagination.current, pagination.pageSize, searchText, regionFilter, cityFilter, statusFilter, campaignTypeFilter, dateRange || undefined);
@@ -401,13 +391,6 @@ const DataManagement = () => {
               <Option value="暂停">暂停</Option>
               <Option value="异常">异常</Option>
             </Select>
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <RangePicker
-              style={{ width: '100%' }}
-              placeholder={['开始日期', '结束日期']}
-              onChange={handleDateRangeChange}
-            />
           </Col>
         </Row>
       </Card>

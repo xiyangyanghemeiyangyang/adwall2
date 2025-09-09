@@ -10,7 +10,8 @@ import {
   message,
   Spin,
   Space,
-  Tag
+  Tag,
+  Tabs
 } from 'antd';
 import { 
   ArrowLeftOutlined,
@@ -361,7 +362,7 @@ const DataDetail = () => {
     return { regions, cities };
   };
 
-  const { regions, cities } = getCustomerRegionsAndCities();
+  
 
   return (
     <div className="data-detail">
@@ -381,39 +382,7 @@ const DataDetail = () => {
           </Title>
         </Space>
         
-        {/* 客户推广区域和城市信息 */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-          <Col span={24}>
-            <Card title="推广覆盖范围" size="small">
-              <Row gutter={[16, 8]}>
-                <Col xs={24} sm={12}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <strong>推广区域：</strong>
-                    <div style={{ marginTop: '4px' }}>
-                      {regions.map((region, index) => (
-                        <Tag key={index} color="blue" style={{ margin: '2px' }}>
-                          {region}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                </Col>
-                <Col xs={24} sm={12}>
-                  <div>
-                    <strong>覆盖城市：</strong>
-                    <div style={{ marginTop: '4px' }}>
-                      {cities.map((city, index) => (
-                        <Tag key={index} color="green" style={{ margin: '2px' }}>
-                          {city}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                </Col>
-              </Row>
-            </Card>
-          </Col>
-        </Row>
+
         
         <Row gutter={[16, 16]}>
           <Col span={24}>
@@ -537,60 +506,69 @@ const DataDetail = () => {
         </Col>
       </Row>
 
-      {/* 区域详细数据表格 */}
+      {/* 明细切换 */}
       <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
         <Col span={24}>
-          <Card title="区域详细数据">
-            <Row gutter={[16, 16]}>
-              {dataDetail.regionData.map((region, index) => (
-                <Col xs={24} sm={12} md={8} lg={6} key={index}>
-                  <Card size="small" style={{ textAlign: 'center' }}>
-                    <div style={{ marginBottom: '8px' }}>
-                      <Tag color="blue">{region.region}</Tag>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      <div>点击量: {region.totalClicks.toLocaleString()}</div>
-                      <div>花费: ¥{region.totalCost.toLocaleString()}</div>
-                      <div>收入: ¥{region.totalRevenue.toLocaleString()}</div>
-                      <div>转化率: {region.avgConversionRate.toFixed(2)}%</div>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+          <Card>
+            <Tabs
+              defaultActiveKey="region"
+              items={[
+                {
+                  key: 'region',
+                  label: '区域详细数据',
+                  children: (
+                    <Row gutter={[16, 16]}>
+                      {dataDetail.regionData.map((region, index) => (
+                        <Col xs={24} sm={12} md={8} lg={6} key={index}>
+                          <Card size="small" style={{ textAlign: 'center' }}>
+                            <div style={{ marginBottom: '8px' }}>
+                              <Tag color="blue">{region.region}</Tag>
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#666' }}>
+                              <div>点击量: {region.totalClicks.toLocaleString()}</div>
+                              <div>花费: ¥{region.totalCost.toLocaleString()}</div>
+                              <div>收入: ¥{region.totalRevenue.toLocaleString()}</div>
+                              <div>转化率: {region.avgConversionRate.toFixed(2)}%</div>
+                            </div>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
+                  ),
+                },
+                ...(dataDetail.cityData && dataDetail.cityData.length > 0
+                  ? [{
+                      key: 'city',
+                      label: '城市详细数据',
+                      children: (
+                        <Row gutter={[16, 16]}>
+                          {dataDetail.cityData.map((city, index) => (
+                            <Col xs={24} sm={12} md={8} lg={6} key={index}>
+                              <Card size="small" style={{ textAlign: 'center' }}>
+                                <div style={{ marginBottom: '8px' }}>
+                                  <Tag color="green">{city.city}</Tag>
+                                  <div style={{ fontSize: '10px', color: '#999', marginTop: '2px' }}>
+                                    {city.region}
+                                  </div>
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#666' }}>
+                                  <div>点击量: {city.totalClicks.toLocaleString()}</div>
+                                  <div>花费: ¥{city.totalCost.toLocaleString()}</div>
+                                  <div>收入: ¥{city.totalRevenue.toLocaleString()}</div>
+                                  <div>转化率: {city.avgConversionRate.toFixed(2)}%</div>
+                                </div>
+                              </Card>
+                            </Col>
+                          ))}
+                        </Row>
+                      ),
+                    }]
+                  : [])
+              ]}
+            />
           </Card>
         </Col>
       </Row>
-
-      {/* 城市详细数据表格 */}
-      {dataDetail.cityData && dataDetail.cityData.length > 0 && (
-        <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-          <Col span={24}>
-            <Card title="城市详细数据">
-              <Row gutter={[16, 16]}>
-                {dataDetail.cityData.map((city, index) => (
-                  <Col xs={24} sm={12} md={8} lg={6} key={index}>
-                    <Card size="small" style={{ textAlign: 'center' }}>
-                      <div style={{ marginBottom: '8px' }}>
-                        <Tag color="green">{city.city}</Tag>
-                        <div style={{ fontSize: '10px', color: '#999', marginTop: '2px' }}>
-                          {city.region}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>
-                        <div>点击量: {city.totalClicks.toLocaleString()}</div>
-                        <div>花费: ¥{city.totalCost.toLocaleString()}</div>
-                        <div>收入: ¥{city.totalRevenue.toLocaleString()}</div>
-                        <div>转化率: {city.avgConversionRate.toFixed(2)}%</div>
-                      </div>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </Card>
-          </Col>
-        </Row>
-      )}
     </div>
   );
 };
