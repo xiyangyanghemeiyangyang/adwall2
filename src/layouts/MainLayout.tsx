@@ -48,12 +48,9 @@ const MainLayout = () => {
       children: [
         {
           key: 'customer-management',
-          label: '客户管理',
+          label: '员工管理',
         },
-        {
-          key: 'user-management',
-          label: '用户管理',
-        },
+        
         {
           key: 'content-management',
           label: '内容管理',

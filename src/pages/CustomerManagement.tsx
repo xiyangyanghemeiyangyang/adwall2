@@ -68,6 +68,7 @@ const CustomerManagement = () => {
         contractStatus,
         status
       });
+      
       setCustomers(result.data);
       setPagination(prev => ({
         ...prev,
@@ -75,15 +76,16 @@ const CustomerManagement = () => {
         total: result.total
       }));
     } catch (error) {
-      message.error('获取客户列表失败');
+      message.error('获取员工列表失败');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    
+     fetchCustomers(pagination.current, pagination.pageSize, searchText, contractStatusFilter, statusFilter);
+      }, []);
 
   // 处理搜索
   const handleSearch = (value: string) => {
@@ -138,17 +140,17 @@ const CustomerManagement = () => {
       if (editingCustomer) {
         const ok = await customerApi.updateCustomer(editingCustomer.id, values);
         if (!ok) throw new Error('更新失败');
-        message.success('客户信息更新成功');
+        message.success('员工信息更新成功');
       } else {
         const ok = await customerApi.addCustomer(values);
         if (!ok) throw new Error('新增失败');
-        message.success('客户添加成功');
+        message.success('员工添加成功');
       }
       setModalVisible(false);
       form.resetFields();
       fetchCustomers(pagination.current, pagination.pageSize, searchText, contractStatusFilter, statusFilter);
     } catch (error) {
-      message.error('保存客户信息失败');
+      message.error('保存员工信息失败');
     }
   };
 
@@ -156,28 +158,60 @@ const CustomerManagement = () => {
   const handleDeleteCustomer = async (customer: Customer) => {
     try {
       await customerApi.updateCustomerStatus(customer.id, '注销');
-      message.success('客户账户已注销');
+      message.success('员工账户已注销');
       fetchCustomers(pagination.current, pagination.pageSize, searchText, contractStatusFilter, statusFilter);
     } catch (error) {
-      message.error('注销客户账户失败');
+      message.error('注销员工账户失败');
     }
   };
 
-  // 表格列定义
-  const columns: ColumnsType<Customer> = [
-    {
-      title: '客户名称',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text, record) => (
-        <div>
-          <div style={{ fontWeight: 'bold' }}>{text}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            <UserOutlined /> {record.company}
+    // 基于 company 的稳定配色（同名公司固定同一颜色）
+    const tagColors = ['#1677ff', '#ff4d4f', '#52c41a', '#fa8c16', '#722ed1', '#13c2c2', '#2f54eb', '#eb2f96'];
+    const bgColors  = ['#E6F4FF', '#FFF1F0', '#F6FFED', '#FFF7E6', '#F9F0FF', '#E6FFFB', '#F0F5FF', '#FFF0F6'];
+  
+    const companyColorIndex = (name: string) => {
+      let h = 0;
+      for (let i = 0; i < name.length; i++) h = (h << 5) - h + name.charCodeAt(i);
+      return Math.abs(h) % tagColors.length;
+    };
+    const getTagColor = (name: string) => tagColors[companyColorIndex(name)];
+    const getBgColor  = (name: string) => bgColors[companyColorIndex(name)];
+
+    // 表格列定义
+    const companySpan = (() => {
+      const map: Record<string, { firstIndex: number; count: number }> = {};
+      customers.forEach((c, idx) => {
+        if (!map[c.company]) map[c.company] = { firstIndex: idx, count: 0 };
+        map[c.company].count += 1;
+      });
+      return map;
+    })();
+  
+    const columns: ColumnsType<Customer> = [
+      {
+        title: '部门',
+        dataIndex: 'company',
+        key: 'company',
+        onCell: (record, index) => {
+          <Tag color={getTagColor(record.company)}>{record.company}</Tag>
+          const info = companySpan[record.company];
+          if (!info) return {};
+          if (index === info.firstIndex) {
+            return { rowSpan: info.count };
+          }
+          return { rowSpan: 0 };
+        },
+      },
+      {
+        title: '员工名称',
+        dataIndex: 'name',
+        key: 'name',
+        render: (text) => (
+          <div>
+            <div style={{ fontWeight: 'bold' }}>{text}</div>
           </div>
-        </div>
-      ),
-    },
+        ),
+      },
     {
       title: '推广区域',
       dataIndex: 'region',
@@ -251,11 +285,7 @@ const CustomerManagement = () => {
       ],
       onFilter: (value, record) => record.status === value,
     },
-    {
-      title: '负责人',
-      dataIndex: 'assignedTo',
-      key: 'assignedTo',
-    },
+    
     {
       title: '操作',
       key: 'action',
@@ -285,7 +315,7 @@ const CustomerManagement = () => {
           {record.status === '正常' && (
             <Popconfirm
               title="确认注销"
-              description={`确定要注销客户"${record.name}"的账户吗？`}
+              description={`确定要注销员工"${record.name}"的账户吗？`}
               okText="确认"
               cancelText="取消"
               // 按钮样式的更改
@@ -321,7 +351,7 @@ const CustomerManagement = () => {
   return (
     <div className="customer-management">
       <div style={{ marginBottom: '24px' }}>
-        <Title level={4}>客户管理</Title>
+        <Title level={4}>员工管理</Title>
       </div>
 
       {/* 统计卡片 */}
@@ -329,7 +359,7 @@ const CustomerManagement = () => {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="客户总数"
+              title="员工总数"
               value={stats.total}
               prefix={<UserOutlined />}
               valueStyle={{ color: '#1677ff' }}
@@ -373,7 +403,7 @@ const CustomerManagement = () => {
         <Row gutter={[16, 16]} align="middle">
           <Col xs={24} sm={12} md={6}>
             <Search
-              placeholder="搜索客户姓名、公司、电话或区域"
+              placeholder="搜索员工姓名、公司、电话或区域"
               allowClear
               enterButton={
                 <Button
@@ -393,7 +423,7 @@ const CustomerManagement = () => {
               placeholder="合同状态"
               allowClear
               style={{ width: '100%' }}
-              value={contractStatusFilter}
+              value={contractStatusFilter || undefined}
               onChange={handleContractStatusFilter}
             >
               <Option value="未签约">未签约</Option>
@@ -407,7 +437,7 @@ const CustomerManagement = () => {
               placeholder="账户状态"
               allowClear
               style={{ width: '100%' }}
-              value={statusFilter}
+              value={statusFilter || undefined}
               onChange={handleStatusFilter}
             >
               <Option value="正常">正常</Option>
@@ -416,15 +446,15 @@ const CustomerManagement = () => {
           </Col>
           <Col xs={24} sm={24} md={10} style={{ textAlign: 'right' }}>
             <Button type="link" style={{ color: '#69b1ff' }} icon={<PlusOutlined style={{ color: '#69b1ff' }} />} onClick={handleAddCustomer}>
-              添加客户
+              添加员工
             </Button>
           </Col>
         </Row>
       </Card>
 
-      {/* 客户列表表格 */}
+      {/* 员工列表表格 */}
       <Card>
-        <Table
+      <Table
           columns={columns}
           dataSource={customers}
           rowKey="id"
@@ -438,12 +468,15 @@ const CustomerManagement = () => {
           }}
           onChange={handleTableChange}
           scroll={{ x: 1000 }}
+          onRow={(record) => ({
+            style: { backgroundColor: getBgColor(record.company) }
+          })}
         />
       </Card>
 
       {/* 新增/编辑客户模态框 */}
       <Modal
-        title={editingCustomer ? '编辑客户' : '新增客户'}
+        title={editingCustomer ? '编辑员工' : '新增员工'}
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
@@ -452,7 +485,7 @@ const CustomerManagement = () => {
         <Form form={form} onFinish={handleSaveCustomer} layout="vertical" initialValues={{ status: '正常', permissions: [] }}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="name" label="客户姓名" rules={[{ required: true }]}>
+              <Form.Item name="name" label="员工姓名" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
@@ -470,7 +503,7 @@ const CustomerManagement = () => {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="company" label="所属公司" rules={[{ required: true }]}>
+              <Form.Item name="company" label="所属部门" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
@@ -478,7 +511,7 @@ const CustomerManagement = () => {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="industry" label="所属行业" rules={[{ required: true }]}>
+              <Form.Item name="industry" label="投放岗位" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
@@ -500,11 +533,7 @@ const CustomerManagement = () => {
                 </Select>
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item name="assignedTo" label="负责人" rules={[{ required: true }]}>
-                <Input />
-              </Form.Item>
-            </Col>
+            
           </Row>
 
           <Form.Item name="permissions" label="推广权限">

@@ -1,8 +1,9 @@
 // 数据管理相关数据类型定义和模拟数据
-
+import { mockCustomers } from './customerData';
 export interface DataRecord {
   id: string;
   customerName: string;
+  company: string;
   customerId: string;
   region: string;
   city: string;
@@ -500,7 +501,7 @@ export const dataManagementApi = {
             record.date >= params.dateRange![0] && record.date <= params.dateRange![1]
           );
         }
-        
+        const companyMap = new Map<string, string>(mockCustomers.map(customer => [customer.id, customer.company]));
         // 按客户ID分组并汇总数据
         const customerMap = new Map<string, CustomerSummary>();
         

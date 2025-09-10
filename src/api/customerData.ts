@@ -86,7 +86,7 @@ const defaultMockCustomers: Customer[] = [
     name: '张三',
     phone: '13800138001',
     email: 'zhangsan@example.com',
-    company: '北京科技有限公司',
+    company: '运营部1',
     industry: '互联网',
     region: '北京市',
     contractStatus: '已签约',
@@ -102,7 +102,7 @@ const defaultMockCustomers: Customer[] = [
     name: '李四',
     phone: '13800138002',
     email: 'lisi@example.com',
-    company: '上海贸易有限公司',
+    company: '运营部1',
     industry: '贸易',
     region: '上海市',
     contractStatus: '续约中',
@@ -118,7 +118,7 @@ const defaultMockCustomers: Customer[] = [
     name: '王五',
     phone: '13800138003',
     email: 'wangwu@example.com',
-    company: '广州制造有限公司',
+    company: '运营部2',
     industry: '制造业',
     region: '广州市',
     contractStatus: '未签约',
@@ -134,7 +134,7 @@ const defaultMockCustomers: Customer[] = [
     name: '赵六',
     phone: '13800138004',
     email: 'zhaoliu@example.com',
-    company: '深圳金融有限公司',
+    company: '运营部2',
     industry: '金融',
     region: '深圳市',
     contractStatus: '已签约',
@@ -150,7 +150,7 @@ const defaultMockCustomers: Customer[] = [
     name: '钱七',
     phone: '13800138005',
     email: 'qianqi@example.com',
-    company: '杭州电商有限公司',
+    company: '运营部3',
     industry: '电商',
     region: '杭州市',
     contractStatus: '已到期',
@@ -166,7 +166,7 @@ const defaultMockCustomers: Customer[] = [
     name: '孙八',
     phone: '13800138006',
     email: 'sunba@example.com',
-    company: '成都教育有限公司',
+    company: '运营部3',
     industry: '教育',
     region: '成都市',
     contractStatus: '已签约',
@@ -390,12 +390,21 @@ export const customerApi = {
         if (params?.status) {
           filteredData = filteredData.filter(customer => customer.status === params.status);
         }
-        
-        const total = filteredData.length;
-        const page = params?.page || 1;
-        const pageSize = params?.pageSize || 10;
-        const start = (page - 1) * pageSize;
-        const end = start + pageSize;
+
+      // 过滤完成后先排序，再做分页
+      filteredData.sort((a, b) => a.company.localeCompare(b.company, 'zh-Hans-CN'));
+
+      const total = filteredData.length;
+      const page = params?.page || 1;
+      const pageSize = params?.pageSize || 10;
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+
+      resolve({
+        data: filteredData.slice(start, end),
+        total
+      });
+
         
         resolve({
           data: filteredData.slice(start, end),

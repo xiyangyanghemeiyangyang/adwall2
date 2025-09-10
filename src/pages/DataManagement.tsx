@@ -26,6 +26,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { dataManagementApi, type CustomerSummary } from '../api/dataManagement';
+import { customerApi, type Customer } from '../api/customerData';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -58,6 +59,21 @@ const DataManagement = () => {
     totalCustomers: 0,
     totalRegions: 0
   });
+  // 从员工管理关联的部门映射
+  const [companyById, setCompanyById] = useState<Record<string, string>>({});
+  const [companyByName, setCompanyByName] = useState<Record<string, string>>({});
+  type CompanyMaps = { byId: Record<string, string>; byName: Record<string, string> };
+  // 部门稳定配色（同部门固定同一颜色）
+  const tagColors = ['#1677ff', '#ff4d4f', '#52c41a', '#fa8c16', '#722ed1', '#13c2c2', '#2f54eb', '#eb2f96'];
+  const bgColors  = ['#E6F4FF', '#FFF1F0', '#F6FFED', '#FFF7E6', '#F9F0FF', '#E6FFFB', '#F0F5FF', '#FFF0F6'];
+  const companyColorIndex = (name: string) => {
+    const key = name || '未知部门';
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h << 5) - h + key.charCodeAt(i);
+    return Math.abs(h) % tagColors.length;
+  };
+  const getTagColor = (name: string) => tagColors[companyColorIndex(name)];
+  const getBgColor  = (name: string) => bgColors[companyColorIndex(name)];
 
   // 获取客户汇总数据列表
   const fetchCustomerSummaries = async (
@@ -68,7 +84,8 @@ const DataManagement = () => {
     city = '',
     status = '',
     campaignType = '',
-    dateRange?: [string, string]
+    dateRange?: [string, string],
+    companyMapsOverride?: CompanyMaps
   ) => {
     setLoading(true);
     try {
@@ -82,7 +99,14 @@ const DataManagement = () => {
         campaignType,
         dateRange
       });
-      setCustomerSummaries(result.data);
+      const maps = companyMapsOverride || { byId: companyById, byName: companyByName };
+      const enhanced = result.data.map((item) => ({
+        ...item,
+        company: item.company || maps.byId[item.customerId] || maps.byName[item.customerName] || '未知部门'
+      }));
+      setCustomerSummaries(
+        enhanced.sort((a, b) => (a.company || '').localeCompare(b.company || '', 'zh-Hans-CN'))
+      );
       setPagination(prev => ({
         ...prev,
         current: page,
@@ -105,6 +129,23 @@ const DataManagement = () => {
       message.error('获取统计数据失败');
     }
   };
+  // 获取员工列表用于部门映射（只取较小页数多次或一次足量）
+  const fetchEmployeesForCompanyMap = async (): Promise<CompanyMaps> => {
+    try {
+      const res = await customerApi.getCustomers({ page: 1, pageSize: 1000, search: '', contractStatus: '', status: '' });
+      const byId: Record<string, string> = {};
+      const byName: Record<string, string> = {};
+      (res.data as Customer[]).forEach((c) => {
+        if (c.id) byId[c.id] = c.company;
+        if (c.name) byName[c.name] = c.company;
+      });
+      setCompanyById(byId);
+      setCompanyByName(byName);
+      return { byId, byName };
+    } catch {
+      return { byId: {}, byName: {} };
+    }
+  };
 // 放在 useState 下面、useEffect 之前
 useEffect(() => {
   const saved = JSON.parse(localStorage.getItem('dm_state') || '{}');
@@ -119,6 +160,8 @@ useEffect(() => {
   setStatusFilter(saved.statusFilter ?? undefined);
   setCampaignTypeFilter(saved.campaignTypeFilter ?? undefined);
 
+  // 先获取员工部门映射，再获取数据列表，保证能填补部门
+  fetchEmployeesForCompanyMap().then((maps) => {
   fetchCustomerSummaries(
     saved.current || 1,
     saved.pageSize || pagination.pageSize,
@@ -127,8 +170,10 @@ useEffect(() => {
     saved.cityFilter || '',
     saved.statusFilter || '',
     saved.campaignTypeFilter || '',
-    undefined
+    undefined,
+    maps
   );
+  });
   fetchStatistics();
 
 
@@ -225,17 +270,37 @@ useEffect(() => {
     navigate(`/data-management/${customerId}`);
   };
 
+  // 按部门分组合并行（与员工管理列表一致）
+  const companySpan = (() => {
+    const map: Record<string, { firstIndex: number; count: number }> = {};
+    customerSummaries.forEach((c, idx) => {
+      const key = c.company || '未知部门';
+      if (!map[key]) map[key] = { firstIndex: idx, count: 0 };
+      map[key].count += 1;
+    });
+    return map;
+  })();
+
   // 主表格列定义
   const columns: ColumnsType<CustomerSummary> = [
+    {
+      title: '部门',
+      dataIndex: 'company',
+      key: 'company',
+      render: (_, record) => <Tag color={getTagColor(record.company || '未知部门')}>{record.company || '未知部门'}</Tag>,
+      onCell: (record, index) => {
+        const info = companySpan[record.company || '未知部门'];
+        if (!info) return {};
+        if (index === info.firstIndex) return { rowSpan: info.count };
+        return { rowSpan: 0 };
+      },
+    },
     {
       title: '客户信息',
       key: 'customer',
       render: (_, record) => (
         <div>
           <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{record.customerName}</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            <UserOutlined /> ID: {record.customerId}
-          </div>
         </div>
       ),
     },
@@ -484,6 +549,9 @@ useEffect(() => {
           }}
           onChange={handleTableChange}
           scroll={{ x: 1200 }}
+          onRow={(record) => ({
+            style: { backgroundColor: getBgColor(record.company || '未知部门') }
+          })}
         />
       </Card>
     </div>

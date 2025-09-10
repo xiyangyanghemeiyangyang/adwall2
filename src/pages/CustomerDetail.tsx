@@ -52,7 +52,7 @@ const CustomerDetail = () => {
   const [purchaseModalVisible, setPurchaseModalVisible] = useState(false);
   const [purchaseForm] = Form.useForm();
 
-  // 获取客户详情
+  // 获取员工详情
   const fetchCustomerDetail = async () => {
     if (!id) return;
     
@@ -70,7 +70,7 @@ const CustomerDetail = () => {
       setTasks(tasksData);
       setStats(statsData);
     } catch (error) {
-      message.error('获取客户详情失败');
+      message.error('获取员工详情失败');
       navigate('/customer-management');
     } finally {
       setLoading(false);
@@ -272,7 +272,7 @@ const CustomerDetail = () => {
   }
 
   if (!customer) {
-    return <div>客户不存在</div>;
+    return <div>员工不存在</div>;
   }
 
   return (
@@ -284,17 +284,17 @@ const CustomerDetail = () => {
           onClick={() => navigate('/customer-management')}
           style={{ marginBottom: '16px' }}
         >
-          返回客户列表
+          返回员工列表
         </Button>
-        <Title level={4}>{customer.name} - 客户详情</Title>
+        <Title level={4}>{customer.name} - 员工详情</Title>
       </div>
 
-      {/* 客户基本信息 */}
+      {/* 员工基本信息 */}
       <Card style={{ marginBottom: '24px' }}>
         <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
             <Descriptions title="基本信息" bordered column={2}>
-              <Descriptions.Item label="客户姓名">{customer.name}</Descriptions.Item>
+              <Descriptions.Item label="员工姓名">{customer.name}</Descriptions.Item>
               <Descriptions.Item label="联系电话">
                 <Space>
                   <PhoneOutlined />
@@ -307,8 +307,8 @@ const CustomerDetail = () => {
                   {customer.email}
                 </Space>
               </Descriptions.Item>
-              <Descriptions.Item label="所属公司">{customer.company}</Descriptions.Item>
-              <Descriptions.Item label="所属行业">{customer.industry}</Descriptions.Item>
+              <Descriptions.Item label="所属部门">{customer.company}</Descriptions.Item>
+              <Descriptions.Item label="推广岗位">{customer.industry}</Descriptions.Item>
               <Descriptions.Item label="推广区域">{customer.region}</Descriptions.Item>
               <Descriptions.Item label="合同状态">
                 <Tag color={
@@ -324,7 +324,7 @@ const CustomerDetail = () => {
                   {customer.status}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="负责人">{customer.assignedTo}</Descriptions.Item>
+              
               <Descriptions.Item label="创建时间" span={2}>
                 <Space>
                   <CalendarOutlined />
@@ -342,7 +342,7 @@ const CustomerDetail = () => {
               </Space>
             </Card>
             {/* 添加标签 */}
-            <Card title="客户标签" size="small" style={{ marginTop: '16px' }} extra={<Button type="link" onClick={() => setAddTagModalVisible(true)} style={{ padding: 0 }}>＋</Button>}>
+            <Card title="员工标签" size="small" style={{ marginTop: '16px' }} extra={<Button type="link" onClick={() => setAddTagModalVisible(true)} style={{ padding: 0 }}>＋</Button>}>
               <Space wrap>
                 {(customer.tags || []).map(tag => (
                   <Tag key={tag} color="green">{tag}</Tag>
@@ -521,7 +521,7 @@ const CustomerDetail = () => {
           </Form.Item>
           <Form.Item name="type" label="任务类型" rules={[{ required: true }]}>
             <Select>
-              <Option value="联系客户">联系客户</Option>
+              <Option value="联系员工">联系员工</Option>
               <Option value="发送报价">发送报价</Option>
               <Option value="发送合同">发送合同</Option>
               <Option value="跟进回访">跟进回访</Option>
