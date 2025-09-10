@@ -287,7 +287,17 @@ useEffect(() => {
       title: '部门',
       dataIndex: 'company',
       key: 'company',
-      render: (_, record) => <Tag color={getTagColor(record.company || '未知部门')}>{record.company || '未知部门'}</Tag>,
+      render: (_, record) => {
+        const name = record.company || '未知部门';
+        if (name.startsWith('运营部')) {
+          return (
+            <Tag color="default" style={{ background: 'transparent', borderColor: 'transparent', color: '#595959' }}>
+              {name}
+            </Tag>
+          );
+        }
+        return <Tag color={getTagColor(name)}>{name}</Tag>;
+      },
       onCell: (record, index) => {
         const info = companySpan[record.company || '未知部门'];
         if (!info) return {};
