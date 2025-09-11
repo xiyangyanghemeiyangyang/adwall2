@@ -1,12 +1,12 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
-import Dashboard from '../pages/Dashboard';
-import Login from '../pages/Login';
+import Dashboard from '../pages/manager/Dashboard';
+// import Login from '../pages/Login';
 import NotFound from '../pages/NotFound';
-import CustomerManagement from '../pages/CustomerManagement';
-import CustomerDetail from '../pages/CustomerDetail';
-import DataManagement from '../pages/DataManagement';
-import DataDetail from '../pages/DataDetail';
+import CustomerManagement from '../pages/manager/CustomerManagement';
+import CustomerDetail from '../pages/manager/CustomerDetail';
+import DataManagement from '../pages/manager/DataManagement';
+import DataDetail from '../pages/manager/DataDetail';
 // import AccountManagement from '../pages/AccountManagement';
 // import ContentReview from '../pages/ContentReview';
 // import RegionManagement from '../pages/RegionManagement';
@@ -73,10 +73,10 @@ const router = createBrowserRouter([
       // },
     ],
   },
-  {
-    path: '/login',
-    element: <Login />,
-  },
+  // {
+  //   path: '/login',
+  //   element: <Login />,
+  // },
   {
     path: '*',
     element: <NotFound />,

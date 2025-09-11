@@ -30,7 +30,7 @@ import {
   DeleteOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { customerApi, type Customer } from '../api/customerData';
+import { customerApi, type Customer } from '../../api/manger/customerData';
 
 const { Title } = Typography;
 const { Search } = Input;

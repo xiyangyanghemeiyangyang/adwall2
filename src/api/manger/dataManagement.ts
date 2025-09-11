@@ -1,5 +1,5 @@
 // 数据管理相关数据类型定义和模拟数据
-import { mockCustomers } from './customerData';
+import { mockCustomers } from '../../api/manger/customerData';
 export interface DataRecord {
   id: string;
   customerName: string;

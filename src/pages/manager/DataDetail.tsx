@@ -22,7 +22,7 @@ import {
   AimOutlined
 } from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
-import { dataManagementApi, type CustomerDataDetail } from '../api/dataManagement';
+import { dataManagementApi, type CustomerDataDetail } from '../../api/manger/dataManagement';
 
 const { Title } = Typography;
 

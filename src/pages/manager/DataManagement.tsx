@@ -25,8 +25,8 @@ import {
   EnvironmentOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { dataManagementApi, type CustomerSummary } from '../api/dataManagement';
-import { customerApi, type Customer } from '../api/customerData';
+import { dataManagementApi, type CustomerSummary } from '../../api/manger/dataManagement';
+import { customerApi, type Customer } from '../../api/manger/customerData';
 
 const { Title } = Typography;
 const { Search } = Input;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+
 import { 
   Card, 
   Descriptions, 
@@ -28,7 +29,7 @@ import {
   PlusOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { customerApi, type Customer, type FollowUpRecord, type Task, type CustomerStats } from '../api/customerData';
+import { customerApi, type Customer, type FollowUpRecord, type Task, type CustomerStats } from '../../api/manger/customerData';
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
