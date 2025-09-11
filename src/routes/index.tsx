@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import ManagerLayout from '../layouts/manger/MainLayout';
 import OperatorLayout from '../layouts/operater/mainlayout';
+import OperatorDashboard from '../pages/operator/Dashboard';
 import Dashboard from '../pages/manager/Dashboard';
 import Login from '../pages/Login';
 // import NotFound from '../pages/NotFound';
@@ -94,8 +95,16 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <Dashboard />,
-      }
+        element: <OperatorDashboard />,
+      },
+      {
+        path: 'content-management',
+        element: <div />,
+      },
+      {
+        path: 'data-management',
+        element: <div />,
+      },
     ],
   },
   {

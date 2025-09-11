@@ -47,7 +47,7 @@ const MainLayout = () => {
       label: '管理',
       children: [
         {
-          key: 'customer-management',
+          key: 'dashboard',
           label: '我的',
         },
         
