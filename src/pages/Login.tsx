@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, 
   Tabs, 
@@ -9,6 +9,8 @@ import { Card,
   message, 
   Typography, 
   Space } from 'antd';
+  import axios from 'axios';
+  import { QRCode } from 'antd';
 
 const { Title, Text } = Typography;
 
@@ -37,11 +39,19 @@ const saveUsers = (users: StoredUser[]) => {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(users)); } catch {}
 };
 
+const API_BASE = (typeof window !== 'undefined' && window.location.hostname === 'labelwall.com')
+  ? 'https://labelwall.com'
+  : 'http://localhost:3001';
+
 const Login = () => {
   const navigate = useNavigate();
   const [activeKey, setActiveKey] = useState('login');
   const [loading, setLoading] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [wxState, setWxState] = useState<string>('');
+  const [wxQrUrl, setWxQrUrl] = useState<string>('');
+  const [wxLoading , setWxLoading] = useState(false);
+  const [wxTimer , setWxTimer] = useState<number| null>(null);
 
   const handleLogin = async (values: { username: string; password: string }) => {
     setLoading(true);
@@ -64,6 +74,54 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+
+
+  const startWeChatLogin = async () => {
+    try {
+      setWxLoading(true);
+      // 让后端生成扫码链接与 state
+      const { data } = await axios.get(`${API_BASE}/wechat/login-url`);
+      setWxState(data.state);
+      setWxQrUrl(data.url);
+
+      // 清理旧轮询
+      if (wxTimer) {
+        window.clearInterval(wxTimer);
+      }
+      // 开始轮询状态
+      const tid = window.setInterval(async () => {
+        try {
+          const resp = await axios.get(`${API_BASE}/wechat/status`, { params: { state: data.state } });
+          if (resp.data.status === 'ok' && resp.data.user) {
+            // 模拟生成本系统用户与 token
+            const user = { username: resp.data.user.nickname || 'wx_user', role: 'manager', openid: resp.data.user.openid };
+            localStorage.setItem('token', 'wx-mock-token');
+            localStorage.setItem('user', JSON.stringify(user));
+            
+
+            // 跳转
+            navigate('/page/manger');
+            window.clearInterval(tid);
+            setWxTimer(null);
+          }
+        } catch {}
+      }, 1500);
+      setWxTimer(tid);
+    } finally {
+      setWxLoading(false);
+    }
+  };
+
+  // 组件卸载时清理轮询
+  useEffect(() => {
+    return () => {
+      if (wxTimer) {
+        try { window.clearInterval(wxTimer); } catch {}
+      }
+    };
+  }, [wxTimer]);
+
 
   const handleRegister = async (values: { username: string; password: string; confirm: string; role: RoleType }) => {
     setRegisterLoading(true);
@@ -91,8 +149,13 @@ const Login = () => {
           <Text type="secondary">按照角色进入不同工作台</Text>
         </div>
         <Tabs
+          
+          
           activeKey={activeKey}
-          onChange={setActiveKey}
+          onChange={(k) => {
+            setActiveKey(k);
+            if (k === 'wechat' && !wxQrUrl) startWeChatLogin();
+          }}
           items={[
             {
               key: 'login',
@@ -114,6 +177,27 @@ const Login = () => {
                 </Form>
               )
             },
+          
+          {
+            key: 'wechat',
+            label: '微信扫码',
+            children: (
+              <div style={{ textAlign: 'center', paddingTop: 8 }}>
+                <div style={{ marginBottom: 12 }}>请使用微信“扫一扫”扫描下方二维码</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                  <QRCode value={wxQrUrl || 'about:blank'} size={180} />
+                </div>
+                <Space>
+                  <Button type="link" onClick={startWeChatLogin} loading={wxLoading} style={{ color: '#69b1ff' }}>
+                    {wxQrUrl ? '刷新二维码' : '生成二维码'}
+                  </Button>
+                </Space>
+              </div>
+            ),
+          },
+
+
+
             {
               key: 'register',
               label: '注册',
