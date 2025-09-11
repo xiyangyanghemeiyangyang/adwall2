@@ -9,6 +9,7 @@ import CustomerManagement from '../pages/manager/CustomerManagement';
 import CustomerDetail from '../pages/manager/CustomerDetail';
 import DataManagement from '../pages/manager/DataManagement';
 import DataDetail from '../pages/manager/DataDetail';
+import ContentManagement from '../pages/manager/ContentManagement';
 // import AccountManagement from '../pages/AccountManagement';
 // import ContentReview from '../pages/ContentReview';
 // import RegionManagement from '../pages/RegionManagement';
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: 'dashboard',
         element: <Dashboard />,
+      },
+      {
+        path: 'content-management',
+        element: <ContentManagement />,
       },
       {
         path: 'workbench/homepage',
