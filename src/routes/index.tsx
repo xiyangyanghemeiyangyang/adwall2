@@ -1,8 +1,9 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import MainLayout from '../layouts/MainLayout';
+import ManagerLayout from '../layouts/manger/MainLayout';
+import OperatorLayout from '../layouts/operater/mainlayout';
 import Dashboard from '../pages/manager/Dashboard';
-// import Login from '../pages/Login';
-import NotFound from '../pages/NotFound';
+import Login from '../pages/Login';
+// import NotFound from '../pages/NotFound';
 import CustomerManagement from '../pages/manager/CustomerManagement';
 import CustomerDetail from '../pages/manager/CustomerDetail';
 import DataManagement from '../pages/manager/DataManagement';
@@ -17,11 +18,20 @@ import DataDetail from '../pages/manager/DataDetail';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
+    element: <Navigate to="/login" replace />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  // 管理者工作台
+  {
+    path: '/page/manger',
+    element: <ManagerLayout />,
     children: [
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="dashboard" replace />,
       },
       {
         path: 'dashboard',
@@ -73,13 +83,24 @@ const router = createBrowserRouter([
       // },
     ],
   },
-  // {
-  //   path: '/login',
-  //   element: <Login />,
-  // },
+  // 运营者工作台（示例可后续填充专属页面）
+  {
+    path: '/page/operator',
+    element: <OperatorLayout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="dashboard" replace />,
+      },
+      {
+        path: 'dashboard',
+        element: <Dashboard />,
+      }
+    ],
+  },
   {
     path: '*',
-    element: <NotFound />,
+    element: <Navigate to="/login" replace />,
   },
 ]);
 

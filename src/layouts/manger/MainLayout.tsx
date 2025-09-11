@@ -122,9 +122,9 @@ const MainLayout = () => {
 
   const handleMenuClick = (key: string) => {
     if (key === 'home') {
-      navigate('/dashboard');
+      navigate('/page/manger/dashboard');
     } else {
-      navigate(`/${key}`);
+      navigate(`/page/manger/${key}`);
     }
     if (isMobile) {
       setDrawerOpen(false);
@@ -203,24 +203,37 @@ const MainLayout = () => {
             <div style={{ fontWeight: 'bold', fontSize: isMobile ? '16px' : '18px' }}>标签墙</div>
           </div>
           
-          {!isMobile ? (
-            <Menu 
-              mode="horizontal" 
-              defaultSelectedKeys={['home']} 
-              style={{ border: 'none' }}
-              onClick={({ key }) => handleMenuClick(key as string)}
-            >
-              <Menu.Item key="home">首页</Menu.Item>
-              <Menu.Item key="about">关于我们</Menu.Item>
-              <Menu.Item key="product">产品介绍</Menu.Item>
-              <Menu.Item key="join">加入我们</Menu.Item>
-            </Menu>
-          ) : (
-            <Space>
-              <Button type="link" onClick={() => handleMenuClick('home')}>首页</Button>
-              <Button type="link" onClick={() => handleMenuClick('about')}>关于</Button>
-            </Space>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {!isMobile ? (
+              <Menu 
+                mode="horizontal" 
+                defaultSelectedKeys={['home']} 
+                style={{ border: 'none' }}
+                onClick={({ key }) => handleMenuClick(key as string)}
+              >
+                <Menu.Item key="home">首页</Menu.Item>
+                <Menu.Item key="about">关于我们</Menu.Item>
+                <Menu.Item key="product">产品介绍</Menu.Item>
+                <Menu.Item key="join">加入我们</Menu.Item>
+              </Menu>
+            ) : (
+              <Space>
+                <Button type="link" onClick={() => handleMenuClick('home')}>首页</Button>
+                <Button type="link" onClick={() => handleMenuClick('about')}>关于</Button>
+              </Space>
+            )}
+            <Button 
+              type="link" 
+              danger 
+              onClick={() => {
+                try {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                } catch {}
+                navigate('/login');
+              }}
+            >退出登录</Button>
+          </div>
         </Header>
         
         <Content
