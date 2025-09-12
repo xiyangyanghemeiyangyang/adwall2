@@ -16,7 +16,7 @@ import { Card,
   Statistic,
   Popconfirm } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { contentApi, type ContentItem, type ContentStatus } from '../../api/manger/contentManagement';
+import { contentApi, type ContentItem, type ContentStatus, type RecruitmentTemplate } from '../../api/manger/contentManagement';
 import { FileTextOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
@@ -36,7 +36,7 @@ const ContentManagement = () => {
   const [createForm] = Form.useForm();
 
 
-  // 新增：模板管理状态
+  // 新增状态
   const [templateLoading, setTemplateLoading] = useState(false);
   const [templates, setTemplates] = useState<RecruitmentTemplate[]>([]);
   const [templatePagination, setTemplatePagination] = useState({ current: 1, pageSize: 6, total: 0 });
@@ -62,7 +62,7 @@ const ContentManagement = () => {
     }
   };
 
-  // 新增：模板管理函数
+  // 新增函数
   const fetchTemplates = async (page = 1, pageSize = templatePagination.pageSize) => {
     setTemplateLoading(true);
     try {
@@ -203,7 +203,7 @@ const ContentManagement = () => {
       title: '创建时间',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (date) => new Date(date).toLocaleDateString()
+      render: (date) => new Date(date).toLocaleString()
     },
     {
       title: '操作',

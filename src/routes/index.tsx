@@ -17,6 +17,9 @@ import ContentManagement from '../pages/manager/ContentManagement';
 // import CommissionSettlement from '../pages/CommissionSettlement';
 // import OperationManagement from '../pages/OperationManagement';
 
+
+import ChannelManagement from '../pages/manager/ChannelManagement';
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -62,6 +65,20 @@ const router = createBrowserRouter([
       {
         path: 'data-management/:customerId',
         element: <DataDetail />,
+      },
+
+
+      {
+        path: 'content-management',
+        element: <ContentManagement />,
+      },
+      {
+        path: 'channel-management',
+        element: <ChannelManagement />,
+      },
+      {
+        path: 'workbench/homepage',
+        element: <Dashboard />,
       },
       // {
       //   path: 'account-management',
