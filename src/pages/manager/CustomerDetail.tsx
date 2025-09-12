@@ -72,7 +72,7 @@ const CustomerDetail = () => {
       setStats(statsData);
     } catch (error) {
       message.error('获取员工详情失败');
-      navigate('/customer-management');
+      navigate('/page/manger/customer-management');
     } finally {
       setLoading(false);
     }
@@ -282,7 +282,7 @@ const CustomerDetail = () => {
       <div style={{ marginBottom: '24px' }}>
         <Button 
           icon={<ArrowLeftOutlined />} 
-          onClick={() => navigate('/customer-management')}
+          onClick={() => navigate('/page/manger/customer-management')}
           style={{ marginBottom: '16px' }}
         >
           返回员工列表

@@ -112,7 +112,7 @@ const CustomerManagement = () => {
 
   // 查看客户详情
   const handleViewCustomer = (customerId: string) => {
-    navigate(`/customer-management/${customerId}`);
+    navigate(`/page/manger/customer-management/${customerId}`);
   };
 
   // 新增客户

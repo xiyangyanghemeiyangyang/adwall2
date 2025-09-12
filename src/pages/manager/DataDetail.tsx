@@ -53,7 +53,7 @@ const DataDetail = () => {
 
   // 返回上一页
   const handleBack = () => {
-    navigate('/data-management');
+    navigate('/page/manger/data-management');
   };
 
   if (loading) {

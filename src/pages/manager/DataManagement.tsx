@@ -267,7 +267,7 @@ useEffect(() => {
 
   // 查看数据详情
   const handleViewDetail = (customerId: string) => {
-    navigate(`/data-management/${customerId}`);
+    navigate(`/page/manger/data-management/${customerId}`);
   };
 
   // 按部门分组合并行（与员工管理列表一致）
