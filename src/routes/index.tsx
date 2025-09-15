@@ -16,6 +16,12 @@ import ContentManagement from '../pages/manager/ContentManagement';
 // import DataAnalysis from '../pages/DataAnalysis';
 // import CommissionSettlement from '../pages/CommissionSettlement';
 // import OperationManagement from '../pages/OperationManagement';
+//b端管理的引入
+
+// import AccountManagement from '../pages/AccountManagement';
+// ...
+
+import BJobManagement from '../pages/manager/BJobManagement';
 
 
 import ChannelManagement from '../pages/manager/ChannelManagement';
@@ -75,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: 'channel-management',
         element: <ChannelManagement />,
+      },
+      {
+        path: 'b-job-management',
+        element: <BJobManagement />,
       },
       {
         path: 'workbench/homepage',

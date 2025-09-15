@@ -10,6 +10,7 @@ import {
   AimOutlined,
   SendOutlined,
   MenuOutlined,
+  CheckCircleOutlined
 } from '@ant-design/icons';
 
 const { Header, Sider, Content } = Layout;
@@ -44,7 +45,7 @@ const MainLayout = () => {
     {
       key: 'management',
       icon: <SettingOutlined />,
-      label: '管理',
+      label: '运营管理',
       children: [
         {
           key: 'customer-management',
@@ -66,55 +67,59 @@ const MainLayout = () => {
       ],
     },
     {
-      key: 'message',
+      key: 'job-management',
+      icon: <AimOutlined />,
+      label: '招聘管理',
+      children: [
+        {
+          key: 'b-job-management',
+          label: 'B端岗位管理',
+        },
+        {
+          key: 'c-job-management',
+          label: 'C端简历管理',
+        },
+        {
+          key: 'ad-campaign',
+          label: '广告投放',
+        },
+      ],
+    },
+    {
+      key: 'communication',
       icon: <MessageOutlined />,
-      label: '消息',
+      label: '消息中心',
       children: [
         {
           key: 'user-feedback',
           label: '用户反馈',
         },
         {
-          key: 'user-report',
-          label: '用户投诉',
-        },
-        {
-          key: 'site-data',
-          label: '站点数据',
+          key: 'system-announcement',
+          label: '系统公告',
         },
       ],
     },
     {
-      key: 'goal',
-      icon: <AimOutlined />,
-      label: '目标',
+      key: 'audit',
+      icon: <CheckCircleOutlined />,
+      label: '审核',
       children: [
         {
-          key: 'my-goal',
-          label: '我的目标',
+          key: 'company-audit',
+          label: '企业认证审核',
         },
         {
-          key: 'personal-goal',
-          label: '小组目标',
+          key: 'job-post-audit',
+          label: '职位发布审核',
         },
         {
-          key: 'team-goal',
-          label: '团队目标',
-        },
-      ],
-    },
-    {
-      key: 'publish',
-      icon: <SendOutlined />,
-      label: '发布',
-      children: [
-        {
-          key: 'activity-publish',
-          label: '动态发布',
+          key: 'resume-audit',
+          label: '简历审核',
         },
         {
-          key: 'post-publish',
-          label: '岗位发布',
+          key: 'operaterid-audit',
+          label: '运营者身份审核',
         },
       ],
     },

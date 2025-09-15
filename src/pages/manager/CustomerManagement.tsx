@@ -44,7 +44,7 @@ const CustomerManagement = () => {
     current: 1,
     pageSize: 4,
     total: 0
-  });
+  });//列表分页
   const [searchText, setSearchText] = useState('');
   const [contractStatusFilter, setContractStatusFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');

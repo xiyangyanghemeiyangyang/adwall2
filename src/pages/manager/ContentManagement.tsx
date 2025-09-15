@@ -19,7 +19,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { contentApi, type ContentItem, type ContentStatus, type RecruitmentTemplate } from '../../api/manger/contentManagement';
 import { FileTextOutlined, PlusOutlined, EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
 
-const { Title, Text } = Typography;
+const { Title , Text } = Typography;
 const { Option } = Select;
 const { TextArea } = Input;
 
@@ -48,7 +48,7 @@ const ContentManagement = () => {
   const [currentTemplate, setCurrentTemplate] = useState<RecruitmentTemplate | null>(null);
   const [templateForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState('content');
-
+//获取内容列表
   const fetchList = async (page = 1, pageSize = pagination.pageSize) => {
     setLoading(true);
     try {
