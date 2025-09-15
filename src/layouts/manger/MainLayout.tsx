@@ -118,7 +118,7 @@ const MainLayout = () => {
           label: '简历审核',
         },
         {
-          key: 'operaterid-audit',
+          key: 'operator-audit',
           label: '运营者身份审核',
         },
       ],

@@ -25,6 +25,7 @@ import BJobManagement from '../pages/manager/BJobManagement';
 
 
 import ChannelManagement from '../pages/manager/ChannelManagement';
+import OperatorAudit from '../pages/manager/OperatorAudit';
 
 const router = createBrowserRouter([
   {
@@ -85,6 +86,10 @@ const router = createBrowserRouter([
       {
         path: 'b-job-management',
         element: <BJobManagement />,
+      },
+      {
+        path: 'operator-audit',
+        element: <OperatorAudit />,
       },
       {
         path: 'workbench/homepage',

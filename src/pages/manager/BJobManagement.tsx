@@ -368,7 +368,7 @@ const BJobManagement = () => {
               <div style={{ textAlign: 'right', marginTop: 12 }}>
                 <Space>
                   <Button onClick={() => handleReject(current)} danger icon={<CloseCircleOutlined />}>驳回</Button>
-                  <Button type="primary" onClick={() => handleApprove(current)} icon={<CheckCircleOutlined />}>通过</Button>
+                  <Button type="link" onClick={() => handleApprove(current)} icon={<CheckCircleOutlined />}>通过</Button>
                 </Space>
               </div>
             )}
