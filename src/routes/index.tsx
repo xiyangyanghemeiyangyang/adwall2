@@ -22,6 +22,7 @@ import ContentManagement from '../pages/manager/ContentManagement';
 // ...
 
 import BJobManagement from '../pages/manager/BJobManagement';
+import JobDetail from '../pages/manager/JobDetail';
 
 
 import ChannelManagement from '../pages/manager/ChannelManagement';
@@ -86,6 +87,10 @@ const router = createBrowserRouter([
       {
         path: 'b-job-management',
         element: <BJobManagement />,
+      },
+      {
+        path: 'b-job-management/:jobId',
+        element: <JobDetail />,
       },
       {
         path: 'operator-audit',

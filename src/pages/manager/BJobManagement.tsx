@@ -1,5 +1,6 @@
 // src/pages/manager/BJobManagement.tsx
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Row, Col, Input, Select, DatePicker, Button, Table, Tag, Space, Modal, Form, message, Descriptions, Typography, Popconfirm ,Flex} from 'antd';
 import { EyeOutlined, EditOutlined, CheckCircleOutlined, CloseCircleOutlined, StopOutlined, DeleteOutlined, SearchOutlined, BarChartOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -35,6 +36,7 @@ const BJobManagement = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [current, setCurrent] = useState<Job | null>(null);
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
   const stats = useMemo(() => {
     const totalCount = total;
@@ -124,9 +126,7 @@ const BJobManagement = () => {
   };
 
   const openView = async (record: Job) => {
-    const detail = await jobApi.getJobById(record.id);
-    setCurrent(detail);
-    setViewOpen(true);
+    navigate(`/page/manger/b-job-management/${record.id}`);
   };
 
   const openEdit = (record: Job) => {
