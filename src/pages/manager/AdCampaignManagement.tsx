@@ -17,6 +17,7 @@ import {
   FilterOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import ReactECharts from 'echarts-for-react';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -169,6 +170,352 @@ const AdCampaignManagement = () => {
   }, { impressions: 0, clicks: 0, conversions: 0, cost: 0, revenue: 0 });
 
   const totalROI = totalStats.cost > 0 ? totalStats.revenue / totalStats.cost : 0;
+
+  // ECharts 配置
+  const getPlatformPerformanceOption = () => {
+    const platformData = data.reduce((acc, campaign) => {
+      if (!acc[campaign.platform]) {
+        acc[campaign.platform] = {
+          impressions: 0,
+          clicks: 0,
+          conversions: 0,
+          cost: 0,
+          revenue: 0
+        };
+      }
+      acc[campaign.platform].impressions += campaign.impressions || 0;
+      acc[campaign.platform].clicks += campaign.clicks || 0;
+      acc[campaign.platform].conversions += campaign.conversions || 0;
+      acc[campaign.platform].cost += campaign.cost || 0;
+      acc[campaign.platform].revenue += campaign.revenue || 0;
+      return acc;
+    }, {} as any);
+
+    const platforms = Object.keys(platformData);
+    const impressions = platforms.map(p => platformData[p].impressions);
+    const clicks = platforms.map(p => platformData[p].clicks);
+    const conversions = platforms.map(p => platformData[p].conversions);
+
+    return {
+      title: {
+        text: '各平台投放效果对比',
+        left: 'center',
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      legend: {
+        data: ['展示量', '点击量', '转化量'],
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        top: '15%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: platforms,
+        axisLabel: {
+          rotate: 45
+        }
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '展示量',
+          type: 'bar',
+          data: impressions,
+          itemStyle: {
+            color: '#3b82f6'
+          }
+        },
+        {
+          name: '点击量',
+          type: 'bar',
+          data: clicks,
+          itemStyle: {
+            color: '#10b981'
+          }
+        },
+        {
+          name: '转化量',
+          type: 'bar',
+          data: conversions,
+          itemStyle: {
+            color: '#f59e0b'
+          }
+        }
+      ]
+    };
+  };
+
+  const getROIAnalysisOption = () => {
+    const roiData = data.map(campaign => ({
+      name: campaign.name,
+      value: campaign.roi || 0,
+      platform: campaign.platform,
+      cost: campaign.cost || 0
+    }));
+
+    return {
+      title: {
+        text: '广告活动ROI分析',
+        left: 'center',
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)<br/>成本: ¥{@cost}'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+        top: 'middle'
+      },
+      series: [
+        {
+          name: 'ROI',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          center: ['60%', '50%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: '18',
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: roiData
+        }
+      ]
+    };
+  };
+
+  const getCostTrendOption = () => {
+    // 模拟7天的成本趋势数据
+    const dates = [];
+    const costData = [];
+    const revenueData = [];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = dayjs().subtract(i, 'day').format('MM-DD');
+      dates.push(date);
+      costData.push(Math.floor(Math.random() * 10000) + 5000);
+      revenueData.push(Math.floor(Math.random() * 15000) + 8000);
+    }
+
+    return {
+      title: {
+        text: '成本与收入趋势',
+        left: 'center',
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        }
+      },
+      legend: {
+        data: ['成本', '收入'],
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        top: '15%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: dates
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: {
+          formatter: '¥{value}'
+        }
+      },
+      series: [
+        {
+          name: '成本',
+          type: 'line',
+          data: costData,
+          smooth: true,
+          itemStyle: {
+            color: '#ef4444'
+          },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: 'rgba(239, 68, 68, 0.3)'
+              }, {
+                offset: 1, color: 'rgba(239, 68, 68, 0.1)'
+              }]
+            }
+          }
+        },
+        {
+          name: '收入',
+          type: 'line',
+          data: revenueData,
+          smooth: true,
+          itemStyle: {
+            color: '#10b981'
+          },
+          areaStyle: {
+            color: {
+              type: 'linear',
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [{
+                offset: 0, color: 'rgba(16, 185, 129, 0.3)'
+              }, {
+                offset: 1, color: 'rgba(16, 185, 129, 0.1)'
+              }]
+            }
+          }
+        }
+      ]
+    };
+  };
+
+  const getCTRAnalysisOption = () => {
+    const ctrData = data.map(campaign => ({
+      name: campaign.name,
+      ctr: ((campaign.ctr || 0) * 100).toFixed(1),
+      cpc: (campaign.cpc || 0).toFixed(1),
+      platform: campaign.platform
+    }));
+
+    return {
+      title: {
+        text: 'CTR与CPC分析',
+        left: 'center',
+        textStyle: {
+          fontSize: 16,
+          fontWeight: 'bold'
+        }
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        },
+        formatter: function(params: any) {
+          let result = params[0].name + '<br/>';
+          params.forEach((param: any) => {
+            result += param.seriesName + ': ' + param.value;
+            if (param.seriesName === 'CTR') {
+              result += '%';
+            } else {
+              result += '元';
+            }
+            result += '<br/>';
+          });
+          return result;
+        }
+      },
+      legend: {
+        data: ['CTR', 'CPC'],
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        top: '15%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'category',
+        data: ctrData.map(item => item.name),
+        axisLabel: {
+          rotate: 45
+        }
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: 'CTR (%)',
+          position: 'left',
+          axisLabel: {
+            formatter: '{value}%'
+          }
+        },
+        {
+          type: 'value',
+          name: 'CPC (元)',
+          position: 'right',
+          axisLabel: {
+            formatter: '¥{value}'
+          }
+        }
+      ],
+      series: [
+        {
+          name: 'CTR',
+          type: 'bar',
+          yAxisIndex: 0,
+          data: ctrData.map(item => parseFloat(item.ctr)),
+          itemStyle: {
+            color: '#3b82f6'
+          }
+        },
+        {
+          name: 'CPC',
+          type: 'line',
+          yAxisIndex: 1,
+          data: ctrData.map(item => parseFloat(item.cpc)),
+          itemStyle: {
+            color: '#f59e0b'
+          },
+          lineStyle: {
+            width: 3
+          }
+        }
+      ]
+    };
+  };
 
   return (
     <div style={{ 
@@ -541,14 +888,165 @@ const AdCampaignManagement = () => {
               ),
               children: (
                 <div>
-                  <Card style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                    <Title level={4} style={{ marginBottom: '24px', textAlign: 'center' }}>
-                      📈 投放效果总览
-                    </Title>
+                  {/* 总体统计卡片 */}
+                  <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+                    <Col xs={24} sm={6}>
+                      <Card style={{ 
+                        textAlign: 'center', 
+                        border: 'none', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        background: 'linear-gradient(to bottom right, #3b82f6, #1d4ed8)',
+                        color: 'white'
+                      }}>
+                        <Statistic 
+                          title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>总展示量</span>}
+                          value={totalStats.impressions} 
+                          valueStyle={{ color: 'white' }}
+                          prefix={<EyeOutlined />}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Card style={{ 
+                        textAlign: 'center', 
+                        border: 'none', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        background: 'linear-gradient(to bottom right, #10b981, #059669)',
+                        color: 'white'
+                      }}>
+                        <Statistic 
+                          title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>总点击量</span>}
+                          value={totalStats.clicks} 
+                          valueStyle={{ color: 'white' }}
+                          prefix={<AimOutlined />}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Card style={{ 
+                        textAlign: 'center', 
+                        border: 'none', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        background: 'linear-gradient(to bottom right, #f59e0b, #d97706)',
+                        color: 'white'
+                      }}>
+                        <Statistic 
+                          title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>总成本(¥)</span>}
+                          value={totalStats.cost} 
+                          valueStyle={{ color: 'white' }}
+                          prefix={<DollarOutlined />}
+                        />
+                      </Card>
+                    </Col>
+                    <Col xs={24} sm={6}>
+                      <Card style={{ 
+                        textAlign: 'center', 
+                        border: 'none', 
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        background: 'linear-gradient(to bottom right, #8b5cf6, #7c3aed)',
+                        color: 'white'
+                      }}>
+                        <Statistic 
+                          title={<span style={{ color: 'rgba(255,255,255,0.8)' }}>平均ROI</span>}
+                          value={totalROI.toFixed(2)} 
+                          valueStyle={{ color: 'white' }}
+                          prefix={<RiseOutlined />}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+
+                  {/* 图表区域 */}
+                  <Row gutter={[24, 24]}>
+                    {/* 平台效果对比 */}
+                    <Col xs={24} lg={12}>
+                      <Card 
+                        style={{ 
+                          border: 'none', 
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          height: '400px'
+                        }}
+                        bodyStyle={{ height: '100%', padding: '20px' }}
+                      >
+                        <ReactECharts 
+                          option={getPlatformPerformanceOption()} 
+                          style={{ height: '100%', width: '100%' }}
+                        />
+                      </Card>
+                    </Col>
+
+                    {/* ROI分析 */}
+                    <Col xs={24} lg={12}>
+                      <Card 
+                        style={{ 
+                          border: 'none', 
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          height: '400px'
+                        }}
+                        bodyStyle={{ height: '100%', padding: '20px' }}
+                      >
+                        <ReactECharts 
+                          option={getROIAnalysisOption()} 
+                          style={{ height: '100%', width: '100%' }}
+                        />
+                      </Card>
+                    </Col>
+
+                    {/* 成本趋势 */}
+                    <Col xs={24} lg={12}>
+                      <Card 
+                        style={{ 
+                          border: 'none', 
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          height: '400px'
+                        }}
+                        bodyStyle={{ height: '100%', padding: '20px' }}
+                      >
+                        <ReactECharts 
+                          option={getCostTrendOption()} 
+                          style={{ height: '100%', width: '100%' }}
+                        />
+                      </Card>
+                    </Col>
+
+                    {/* CTR与CPC分析 */}
+                    <Col xs={24} lg={12}>
+                      <Card 
+                        style={{ 
+                          border: 'none', 
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          height: '400px'
+                        }}
+                        bodyStyle={{ height: '100%', padding: '20px' }}
+                      >
+                        <ReactECharts 
+                          option={getCTRAnalysisOption()} 
+                          style={{ height: '100%', width: '100%' }}
+                        />
+                      </Card>
+                    </Col>
+                  </Row>
+
+                  {/* 详细数据表格 */}
+                  <Card 
+                    style={{ 
+                      marginTop: '24px',
+                      border: 'none', 
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                    title="详细效果数据"
+                  >
                     <Row gutter={[16, 16]}>
                       {data.map((campaign) => (
                         <Col xs={24} sm={12} lg={8} key={campaign.id}>
-                          <Card style={{ height: '100%', border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                          <Card 
+                            size="small" 
+                            style={{ 
+                              height: '100%', 
+                              border: '1px solid #f0f0f0',
+                              borderRadius: '8px'
+                            }}
+                          >
                             <div style={{ textAlign: 'center', marginBottom: '16px' }}>
                               <Title level={5} style={{ marginBottom: '8px' }}>{campaign.name}</Title>
                               <Tag color={getPlatformColor(campaign.platform)}>

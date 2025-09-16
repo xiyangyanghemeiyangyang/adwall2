@@ -28,6 +28,7 @@ import UserBehaviorAnalytics from '../pages/manager/UserBehaviorAnalytics';
 import ChannelManagement from '../pages/manager/ChannelManagement';
 import OperatorAudit from '../pages/manager/OperatorAudit';
 import AdCampaignManagement from '../pages/manager/AdCampaignManagement';
+import {Settings} from '../pages/manager/setting';
 
 const router = createBrowserRouter([
   {
@@ -104,6 +105,10 @@ const router = createBrowserRouter([
       {
         path: 'ad-campaign',
         element: <AdCampaignManagement />,
+      },
+      {
+        path: 'setting',
+        element: <Settings />,
       },
       {
         path: 'workbench/homepage',

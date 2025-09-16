@@ -122,6 +122,11 @@ const MainLayout = () => {
         },
       ],
     },
+    {
+      key: 'setting',
+      icon: <SettingOutlined />,
+      label: '设置',
+    },
   ];
 
   const handleMenuClick = (key: string) => {
