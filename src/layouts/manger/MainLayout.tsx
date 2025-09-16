@@ -56,8 +56,8 @@ const MainLayout = () => {
           label: '内容管理',
         },
         {
-          key: 'channel-management',
-          label: '渠道管理',
+          key: 'support-management',
+          label: '问题管理',
         },
         {
           key: 'data-management',

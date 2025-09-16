@@ -25,7 +25,7 @@ import BJobManagement from '../pages/manager/BJobManagement';
 import JobDetail from '../pages/manager/JobDetail';
 import UserBehaviorAnalytics from '../pages/manager/UserBehaviorAnalytics';
 
-import ChannelManagement from '../pages/manager/ChannelManagement';
+import SupportManagement from '../pages/manager/SupportManagement';
 import OperatorAudit from '../pages/manager/OperatorAudit';
 import AdCampaignManagement from '../pages/manager/AdCampaignManagement';
 import {Settings} from '../pages/manager/setting';
@@ -83,8 +83,8 @@ const router = createBrowserRouter([
         element: <ContentManagement />,
       },
       {
-        path: 'channel-management',
-        element: <ChannelManagement />,
+        path: 'support-management',
+        element: <SupportManagement />,
       },
       {
         path: 'b-job-management',
