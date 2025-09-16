@@ -48,8 +48,11 @@ const UserBehaviorAnalytics: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
+  const [rejectModalVisible, setRejectModalVisible] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
 
-  // Glassmorphism styles
+  // 样式
   const glassStyle = {
     backdropFilter: 'blur(16px)',
     background: 'rgba(255, 255, 255, 0.1)',
@@ -103,21 +106,38 @@ const UserBehaviorAnalytics: React.FC = () => {
     }
   };
 
-  const handleReject = async (id: string) => {
-    Modal.confirm({
-      title: '驳回简历',
-      content: '请输入驳回理由',
-      onOk: async (reason: string) => {
-        try {
-          await userBehaviorApi.rejectResume(id, reason);
-          message.success('已驳回');
-          loadResumes();
-        } catch (error) {
-          message.error('操作失败');
-        }
-      }
-    });
+  const handleReject = (id: string) => {
+    setRejectingId(id);
+    setRejectReason('');
+    setRejectModalVisible(true);
   };
+
+  const handleConfirmReject = async () => {
+    if (!rejectReason.trim()) {
+      message.error('请输入驳回理由');
+      return;
+    }
+    
+    if (!rejectingId) return;
+    
+    try {
+      await userBehaviorApi.rejectResume(rejectingId, rejectReason);
+      message.success('已驳回');
+      loadResumes();
+      setRejectModalVisible(false);
+      setRejectReason('');
+      setRejectingId(null);
+    } catch (error) {
+      message.error('操作失败');
+    }
+  };
+
+  const handleCancelReject = () => {
+    setRejectModalVisible(false);
+    setRejectReason('');
+    setRejectingId(null);
+  };
+
 
   const handleViewDetail = async (resume: Resume) => {
     setSelectedResume(resume);
@@ -691,6 +711,29 @@ const UserBehaviorAnalytics: React.FC = () => {
         />
       </Card>
 
+      {/* 驳回理由弹窗 */}
+      <Modal
+        title="驳回简历"
+        open={rejectModalVisible}
+        onOk={handleConfirmReject}
+        onCancel={handleCancelReject}
+        okText="确认驳回"
+        cancelText="取消"
+        okButtonProps={{ danger: true }}
+      >
+        <div className="space-y-4">
+          <p className="text-gray-600">请输入驳回理由：</p>
+          <Input.TextArea
+            placeholder="请详细说明驳回原因..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            rows={4}
+            maxLength={200}
+            showCount
+          />
+        </div>
+      </Modal>
+
       {/* 用户详情弹窗 */}
       <Modal
         title="用户详情"
@@ -700,8 +743,8 @@ const UserBehaviorAnalytics: React.FC = () => {
         footer={null}
       >
         {selectedResume && (
-          <Tabs defaultActiveKey="profile">
-            <TabPane tab="基本信息" key="profile">
+          <Tabs defaultActiveKey="basic">
+            <TabPane tab="基本信息" key="basic">
               <Row gutter={[16, 16]}>
                 <Col span={12}>
                   <Card title="个人信息" size="small">
