@@ -23,7 +23,7 @@ import ContentManagement from '../pages/manager/ContentManagement';
 
 import BJobManagement from '../pages/manager/BJobManagement';
 import JobDetail from '../pages/manager/JobDetail';
-
+import UserBehaviorAnalytics from '../pages/manager/UserBehaviorAnalytics';
 
 import ChannelManagement from '../pages/manager/ChannelManagement';
 import OperatorAudit from '../pages/manager/OperatorAudit';
@@ -95,6 +95,10 @@ const router = createBrowserRouter([
       {
         path: 'operator-audit',
         element: <OperatorAudit />,
+      },
+      {
+        path: 'c-job-management',
+        element: <UserBehaviorAnalytics />,
       },
       {
         path: 'workbench/homepage',

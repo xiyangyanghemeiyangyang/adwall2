@@ -171,7 +171,6 @@ const ChannelManagement = () => {
     return acc;
   }, { impressions: 0, clicks: 0, conversions: 0, cost: 0, revenue: 0 });
   const roiAvg = statTotals.cost > 0 ? statTotals.revenue / statTotals.cost : 0;
-  const cvrAvg = statTotals.clicks > 0 ? statTotals.conversions / statTotals.clicks : 0;
 
   return (
     <div>

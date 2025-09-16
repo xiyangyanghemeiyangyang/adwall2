@@ -69,6 +69,7 @@ export interface CustomerDataDetail {
 export interface CustomerSummary {
   customerId: string;
   customerName: string;
+  company: string;
   totalClicks: number;
   totalCost: number;
   totalRevenue: number;
@@ -148,6 +149,7 @@ const generateMockData = (): DataRecord[] => {
             data.push({
               id: `${customerIndex}-${region}-${city}-${dateStr}-${i}`,
               customerName: customer,
+              company: mockCustomers[customerIndex]?.company || '未知公司',
               customerId: String(customerIndex + 1),
               region,
               city,
@@ -501,7 +503,6 @@ export const dataManagementApi = {
             record.date >= params.dateRange![0] && record.date <= params.dateRange![1]
           );
         }
-        const companyMap = new Map<string, string>(mockCustomers.map(customer => [customer.id, customer.company]));
         // 按客户ID分组并汇总数据
         const customerMap = new Map<string, CustomerSummary>();
         
@@ -534,6 +535,7 @@ export const dataManagementApi = {
             customerMap.set(record.customerId, {
               customerId: record.customerId,
               customerName: record.customerName,
+              company: record.company,
               totalClicks: record.clickCount,
               totalCost: record.cost,
               totalRevenue: record.revenue,

@@ -32,7 +32,6 @@ const ContentManagement = () => {
   const [detailVisible, setDetailVisible] = useState(false);
   const [current, setCurrent] = useState<ContentItem | null>(null);
   const [createVisible, setCreateVisible] = useState(false);
-  const [form] = Form.useForm();
   const [createForm] = Form.useForm();
 
 

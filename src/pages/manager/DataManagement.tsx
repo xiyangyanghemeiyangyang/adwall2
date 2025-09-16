@@ -21,7 +21,6 @@ import {
   BarChartOutlined,
   DollarOutlined,
   AimOutlined,
-  UserOutlined,
   EnvironmentOutlined
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';

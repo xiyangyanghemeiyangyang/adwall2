@@ -48,7 +48,6 @@ const Login = () => {
   const [activeKey, setActiveKey] = useState('login');
   const [loading, setLoading] = useState(false);
   const [registerLoading, setRegisterLoading] = useState(false);
-  const [wxState, setWxState] = useState<string>('');
   const [wxQrUrl, setWxQrUrl] = useState<string>('');
   const [wxLoading , setWxLoading] = useState(false);
   const [wxTimer , setWxTimer] = useState<number| null>(null);
@@ -82,7 +81,6 @@ const Login = () => {
       setWxLoading(true);
       // 让后端生成扫码链接与 state
       const { data } = await axios.get(`${API_BASE}/wechat/login-url`);
-      setWxState(data.state);
       setWxQrUrl(data.url);
 
       // 清理旧轮询

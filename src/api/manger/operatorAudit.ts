@@ -71,7 +71,7 @@ export const operatorAuditApi = {
     return delay(true);
   },
 
-  async reject(id: string, reason?: string) {
+  async reject(id: string, _reason?: string) {
     const one = applicants.find(a => a.id === id);
     if (!one) return delay(false);
     one.status = '已拒绝';

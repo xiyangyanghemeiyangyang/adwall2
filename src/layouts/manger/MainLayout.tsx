@@ -8,7 +8,6 @@ import {
   SettingOutlined,
   MessageOutlined,
   AimOutlined,
-  SendOutlined,
   MenuOutlined,
   CheckCircleOutlined
 } from '@ant-design/icons';

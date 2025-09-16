@@ -16,8 +16,6 @@ import {
 import { 
   ArrowLeftOutlined,
   BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
   DollarOutlined,
   AimOutlined
 } from '@ant-design/icons';
@@ -350,17 +348,7 @@ const DataDetail = () => {
     };
   };
 
-  // 获取客户推广的所有区域和城市信息
-  const getCustomerRegionsAndCities = () => {
-    if (!dataDetail.regionData || dataDetail.regionData.length === 0) {
-      return { regions: [], cities: [] };
-    }
-    
-    const regions = dataDetail.regionData.map(item => item.region);
-    const cities = dataDetail.cityData ? dataDetail.cityData.map(item => item.city) : [];
-    
-    return { regions, cities };
-  };
+  
 
   
 
