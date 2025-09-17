@@ -14,7 +14,10 @@ import {
   Row,
   Col,
   Statistic,
-  Progress
+  Progress,
+  Alert,
+  Timeline,
+  Badge
 } from 'antd';
 import { 
   SearchOutlined, 
@@ -25,11 +28,16 @@ import {
   UserOutlined,
   FileTextOutlined,
   BarChartOutlined,
-  LineChartOutlined
+  LineChartOutlined,
+  // TrendingUpOutlined,
+  RiseOutlined,
+  BulbOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined
 } from '@ant-design/icons';
 import ReactECharts from 'echarts-for-react';
 import { userBehaviorApi } from '../../api/manger/userBehaviorAnalytics';
-import type { Resume, UserBehaviorLog, UserProfile, AnalyticsData } from '../../api/manger/userBehaviorAnalytics';
+import type { Resume, UserBehaviorLog, UserProfile, AnalyticsData, MarketForecastData, JobTrendPrediction, MarketAnalysisReport } from '../../api/manger/userBehaviorAnalytics';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -51,6 +59,8 @@ const UserBehaviorAnalytics: React.FC = () => {
   const [rejectModalVisible, setRejectModalVisible] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [marketForecastData, setMarketForecastData] = useState<MarketForecastData | null>(null);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
   // 样式
   const glassStyle = {
@@ -63,6 +73,7 @@ const UserBehaviorAnalytics: React.FC = () => {
   useEffect(() => {
     loadResumes();
     loadAnalyticsData();
+    loadMarketForecastData();
   }, [currentPage, pageSize, searchParams]);
 
   const loadResumes = async () => {
@@ -88,6 +99,15 @@ const UserBehaviorAnalytics: React.FC = () => {
       setAnalyticsData(data);
     } catch (error) {
       message.error('加载分析数据失败');
+    }
+  };
+
+  const loadMarketForecastData = async () => {
+    try {
+      const data = await userBehaviorApi.getMarketForecastData();
+      setMarketForecastData(data);
+    } catch (error) {
+      message.error('加载市场预测数据失败');
     }
   };
 
@@ -136,6 +156,19 @@ const UserBehaviorAnalytics: React.FC = () => {
     setRejectModalVisible(false);
     setRejectReason('');
     setRejectingId(null);
+  };
+
+  const handleGenerateReport = async (reportType: 'weekly' | 'monthly') => {
+    setGeneratingReport(true);
+    try {
+      const report = await userBehaviorApi.generateMarketReport(reportType);
+      message.success(`${reportType === 'weekly' ? '周' : '月'}度报告生成成功`);
+      loadMarketForecastData(); // 重新加载数据
+    } catch (error) {
+      message.error('生成报告失败');
+    } finally {
+      setGeneratingReport(false);
+    }
   };
 
 
@@ -530,6 +563,98 @@ const UserBehaviorAnalytics: React.FC = () => {
     };
   };
 
+  // 市场预测图表配置
+  const getJobTrendChartOption = () => {
+    if (!marketForecastData) return {};
+    
+    return {
+      title: {
+        text: '职位需求预测趋势',
+        left: 'center',
+        textStyle: { color: '#333' }
+      },
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#ccc',
+        textStyle: { color: '#333' }
+      },
+      legend: {
+        data: ['当前需求', '预测增长'],
+        top: 30
+      },
+      xAxis: {
+        type: 'category',
+        data: marketForecastData.predictions.map(item => item.jobTitle),
+        axisLabel: { 
+          color: '#666',
+          rotate: 45
+        }
+      },
+      yAxis: {
+        type: 'value',
+        axisLabel: { color: '#666' }
+      },
+      series: [
+        {
+          name: '当前需求',
+          type: 'bar',
+          data: marketForecastData.predictions.map(item => item.currentDemand),
+          itemStyle: { color: '#8B5CF6' }
+        },
+        {
+          name: '预测增长',
+          type: 'bar',
+          data: marketForecastData.predictions.map(item => item.predictedGrowth),
+          itemStyle: { color: '#14B8A6' }
+        }
+      ]
+    };
+  };
+
+  const getConfidenceChartOption = () => {
+    if (!marketForecastData) return {};
+    
+    return {
+      title: {
+        text: '预测置信度分析',
+        left: 'center',
+        textStyle: { color: '#333' }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c}%',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderColor: '#ccc',
+        textStyle: { color: '#333' }
+      },
+      series: [
+        {
+          name: '置信度',
+          type: 'pie',
+          radius: '50%',
+          data: marketForecastData.predictions.map(item => ({
+            value: item.confidence,
+            name: item.jobTitle
+          })),
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          },
+          itemStyle: {
+            color: (params: any) => {
+              const colors = ['#8B5CF6', '#14B8A6', '#3B82F6', '#F59E0B', '#EF4444'];
+              return colors[params.dataIndex % colors.length];
+            }
+          }
+        }
+      ]
+    };
+  };
+
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
@@ -895,6 +1020,287 @@ const UserBehaviorAnalytics: React.FC = () => {
                 rowKey="jobTitle"
                 pagination={false}
               />
+            </TabPane>
+            
+            {/* 市场预测标签页 */}
+            <TabPane tab="市场预测" key="forecast">
+              <div className="space-y-6">
+                {/* 预测概览 */}
+                <Row gutter={[16, 16]}>
+                  <Col span={24}>
+                    <Card 
+                      title={
+                        <div className="flex items-center gap-2">
+                          <RiseOutlined className="text-purple-600" />
+                          <span>市场预测概览</span>
+                        </div>
+                      }
+                      style={glassStyle}
+                      className="rounded-2xl"
+                    >
+                      <Row gutter={[16, 16]}>
+                        <Col xs={24} sm={12} lg={6}>
+                          <Statistic
+                            title="预测职位数"
+                            value={marketForecastData?.predictions.length || 0}
+                            prefix={<BarChartOutlined />}
+                            valueStyle={{ color: '#8B5CF6' }}
+                          />
+                        </Col>
+                        <Col xs={24} sm={12} lg={6}>
+                          <Statistic
+                            title="平均增长率"
+                            value={marketForecastData ? 
+                              (marketForecastData.predictions.reduce((sum, p) => sum + p.predictedGrowth, 0) / marketForecastData.predictions.length).toFixed(1) 
+                              : 0
+                            }
+                            suffix="%"
+                            prefix={<RiseOutlined />}
+                            valueStyle={{ color: '#14B8A6' }}
+                          />
+                        </Col>
+                        <Col xs={24} sm={12} lg={6}>
+                          <Statistic
+                            title="平均置信度"
+                            value={marketForecastData ? 
+                              (marketForecastData.predictions.reduce((sum, p) => sum + p.confidence, 0) / marketForecastData.predictions.length).toFixed(1) 
+                              : 0
+                            }
+                            suffix="%"
+                            prefix={<CheckCircleOutlined />}
+                            valueStyle={{ color: '#3B82F6' }}
+                          />
+                        </Col>
+                        <Col xs={24} sm={12} lg={6}>
+                          <Statistic
+                            title="分析报告数"
+                            value={marketForecastData?.reports.length || 0}
+                            prefix={<FileTextOutlined />}
+                            valueStyle={{ color: '#F59E0B' }}
+                          />
+                        </Col>
+                      </Row>
+                    </Card>
+                  </Col>
+                </Row>
+
+                {/* 预测图表 */}
+                <Row gutter={[16, 16]}>
+                  <Col span={12}>
+                    <Card title="职位需求预测趋势" size="small">
+                      <ReactECharts option={getJobTrendChartOption()} style={{ height: '300px' }} />
+                    </Card>
+                  </Col>
+                  <Col span={12}>
+                    <Card title="预测置信度分析" size="small">
+                      <ReactECharts option={getConfidenceChartOption()} style={{ height: '300px' }} />
+                    </Card>
+                  </Col>
+                </Row>
+
+                {/* 详细预测列表 */}
+                <Card title="详细预测分析" style={glassStyle} className="rounded-2xl">
+                  <Table
+                    columns={[
+                      {
+                        title: '职位名称',
+                        dataIndex: 'jobTitle',
+                        key: 'jobTitle',
+                        width: 120,
+                      },
+                      {
+                        title: '行业',
+                        dataIndex: 'industry',
+                        key: 'industry',
+                        width: 100,
+                      },
+                      {
+                        title: '当前需求',
+                        dataIndex: 'currentDemand',
+                        key: 'currentDemand',
+                        width: 100,
+                        render: (value: number) => (
+                          <Progress 
+                            percent={value} 
+                            size="small" 
+                            strokeColor="#8B5CF6"
+                            format={() => `${value}%`}
+                          />
+                        ),
+                      },
+                      {
+                        title: '预测增长',
+                        dataIndex: 'predictedGrowth',
+                        key: 'predictedGrowth',
+                        width: 100,
+                        render: (value: number) => (
+                          <Tag color={value > 15 ? 'green' : value > 8 ? 'orange' : 'red'}>
+                            +{value}%
+                          </Tag>
+                        ),
+                      },
+                      {
+                        title: '置信度',
+                        dataIndex: 'confidence',
+                        key: 'confidence',
+                        width: 100,
+                        render: (value: number) => (
+                          <Badge 
+                            count={`${value}%`} 
+                            style={{ backgroundColor: value > 80 ? '#52c41a' : value > 60 ? '#faad14' : '#f5222d' }}
+                          />
+                        ),
+                      },
+                      {
+                        title: '时间范围',
+                        dataIndex: 'timeframe',
+                        key: 'timeframe',
+                        width: 120,
+                      },
+                      {
+                        title: '建议',
+                        dataIndex: 'recommendation',
+                        key: 'recommendation',
+                        ellipsis: true,
+                      },
+                    ]}
+                    dataSource={marketForecastData?.predictions || []}
+                    rowKey="jobTitle"
+                    pagination={false}
+                    size="small"
+                  />
+                </Card>
+
+                {/* 市场分析报告 */}
+                <Card 
+                  title={
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <BulbOutlined className="text-purple-600" />
+                        <span>市场分析报告</span>
+                      </div>
+                      <Space>
+                        <Button
+                          type="primary"
+                          size="small"
+                          icon={<ClockCircleOutlined />}
+                          onClick={() => handleGenerateReport('weekly')}
+                          loading={generatingReport}
+                          className="bg-gradient-to-r from-purple-500 to-teal-500 border-none"
+                        >
+                          生成周报
+                        </Button>
+                        <Button
+                          type="primary"
+                          size="small"
+                          icon={<FileTextOutlined />}
+                          onClick={() => handleGenerateReport('monthly')}
+                          loading={generatingReport}
+                          className="bg-gradient-to-r from-purple-500 to-teal-500 border-none"
+                        >
+                          生成月报
+                        </Button>
+                      </Space>
+                    </div>
+                  }
+                  style={glassStyle}
+                  className="rounded-2xl"
+                >
+                  <div className="space-y-4">
+                    {marketForecastData?.reports.map((report) => (
+                      <Card key={report.id} size="small" className="border border-gray-200">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-800">{report.title}</h4>
+                            <p className="text-sm text-gray-500">
+                              {new Date(report.generateTime).toLocaleString()}
+                            </p>
+                          </div>
+                          <Tag color={report.reportType === 'weekly' ? 'blue' : 'green'}>
+                            {report.reportType === 'weekly' ? '周报' : '月报'}
+                          </Tag>
+                        </div>
+                        
+                        <Alert
+                          message={report.summary}
+                          type="info"
+                          showIcon
+                          className="mb-3"
+                        />
+                        
+                        <Row gutter={[16, 16]}>
+                          <Col span={12}>
+                            <div>
+                              <h5 className="font-semibold text-gray-700 mb-2">关键发现</h5>
+                              <ul className="text-sm text-gray-600 space-y-1">
+                                {report.keyFindings.map((finding, index) => (
+                                  <li key={index}>• {finding}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </Col>
+                          <Col span={12}>
+                            <div>
+                              <h5 className="font-semibold text-gray-700 mb-2">市场趋势</h5>
+                              <div className="space-y-2">
+                                {report.marketTrends.map((trend, index) => (
+                                  <div key={index} className="flex items-center gap-2">
+                                    <Tag color={trend.impact === 'high' ? 'red' : trend.impact === 'medium' ? 'orange' : 'green'}>
+                                      {trend.impact === 'high' ? '高' : trend.impact === 'medium' ? '中' : '低'}
+                                    </Tag>
+                                    <span className="text-sm text-gray-600">{trend.trend}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </Col>
+                        </Row>
+                        
+                        {report.emergingJobs.length > 0 && (
+                          <div className="mt-4">
+                            <h5 className="font-semibold text-gray-700 mb-2">新兴职位</h5>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {report.emergingJobs.map((job, index) => (
+                                <Card key={index} size="small" className="bg-blue-50">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="font-medium text-blue-800">{job.jobTitle}</span>
+                                    <Tag color="blue">+{job.growthRate}%</Tag>
+                                  </div>
+                                  <p className="text-sm text-blue-600 mb-2">{job.description}</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {job.skills.map((skill, skillIndex) => (
+                                      <Tag key={skillIndex} size="small" color="blue">
+                                        {skill}
+                                      </Tag>
+                                    ))}
+                                  </div>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="mt-4">
+                          <h5 className="font-semibold text-gray-700 mb-2">建议措施</h5>
+                          <Timeline size="small">
+                            {report.recommendations.map((rec, index) => (
+                              <Timeline.Item key={index}>
+                                <div className="flex items-center gap-2">
+                                  <Tag color={rec.priority === 'high' ? 'red' : rec.priority === 'medium' ? 'orange' : 'green'}>
+                                    {rec.priority === 'high' ? '高' : rec.priority === 'medium' ? '中' : '低'}
+                                  </Tag>
+                                  <span className="font-medium text-gray-700">{rec.category}</span>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">{rec.suggestion}</p>
+                              </Timeline.Item>
+                            ))}
+                          </Timeline>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </Card>
+              </div>
             </TabPane>
           </Tabs>
         )}

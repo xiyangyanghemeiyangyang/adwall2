@@ -108,14 +108,14 @@ const MainLayout = () => {
           key: 'company-audit',
           label: '企业认证审核',
         },
-        {
-          key: 'job-post-audit',
-          label: '职位发布审核',
-        },
-        {
-          key: 'resume-audit',
-          label: '简历审核',
-        },
+        // {
+        //   key: 'job-post-audit',
+        //   label: '职位发布审核',
+        // },
+        // {
+        //   key: 'resume-audit',
+        //   label: '简历审核',
+        // },
         {
           key: 'operator-audit',
           label: '运营者身份审核',

@@ -113,6 +113,50 @@ export interface AnalyticsData {
   }>;
 }
 
+// 市场预测相关类型定义
+export interface JobTrendPrediction {
+  jobTitle: string;
+  industry: string;
+  currentDemand: number;
+  predictedGrowth: number; // 百分比
+  confidence: number; // 置信度 0-100
+  timeframe: string; // 预测时间范围
+  factors: string[]; // 影响因素
+  recommendation: string; // 建议
+}
+
+export interface MarketAnalysisReport {
+  id: string;
+  title: string;
+  reportType: 'weekly' | 'monthly';
+  generateTime: string;
+  summary: string;
+  keyFindings: string[];
+  marketTrends: Array<{
+    trend: string;
+    impact: 'high' | 'medium' | 'low';
+    description: string;
+  }>;
+  emergingJobs: Array<{
+    jobTitle: string;
+    growthRate: number;
+    description: string;
+    skills: string[];
+  }>;
+  recommendations: Array<{
+    category: string;
+    suggestion: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+  predictions: JobTrendPrediction[];
+}
+
+export interface MarketForecastData {
+  predictions: JobTrendPrediction[];
+  reports: MarketAnalysisReport[];
+  lastUpdated: string;
+}
+
 // 模拟数据存储
 const STORAGE_KEY_RESUMES = 'user_behavior_resumes';
 const STORAGE_KEY_LOGS = 'user_behavior_logs';
@@ -279,7 +323,7 @@ const mockLogs = loadData(STORAGE_KEY_LOGS, generateMockLogs(mockResumes));
 const mockProfiles = loadData(STORAGE_KEY_PROFILES, generateMockProfiles(mockResumes));
 
 // API 模拟函数
-export const userBehaviorApi = {
+export const userBehaviorApi = {//////////////////////////
   // 获取简历列表
   getResumes: (params?: {
     page?: number;
@@ -503,6 +547,8 @@ export const userBehaviorApi = {
           };
         });
 
+
+
         resolve({
           overview: {
             totalUsers,
@@ -523,5 +569,156 @@ export const userBehaviorApi = {
         });
       }, 500);
     });
+  },
+
+  
+
+      // 获取市场预测数据
+  getMarketForecastData: () => {
+    return new Promise<MarketForecastData>((resolve) => {
+      setTimeout(() => {
+        const predictions: JobTrendPrediction[] = [
+          {
+            jobTitle: '软件测试工程师',
+            industry: '互联网',
+            currentDemand: 85,
+            predictedGrowth: 15,
+            confidence: 88,
+            timeframe: '未来6个月',
+            factors: ['数字化转型加速', '质量要求提升', '自动化测试需求增长'],
+            recommendation: '建议企业加强测试团队建设，关注自动化测试技能培训'
+          },
+          {
+            jobTitle: '数据分析师',
+            industry: '金融',
+            currentDemand: 92,
+            predictedGrowth: 22,
+            confidence: 85,
+            timeframe: '未来6个月',
+            factors: ['数据驱动决策', 'AI技术应用', '监管要求加强'],
+            recommendation: '建议企业培养数据科学团队，投资数据基础设施'
+          },
+          {
+            jobTitle: '前端工程师',
+            industry: '互联网',
+            currentDemand: 78,
+            predictedGrowth: 8,
+            confidence: 75,
+            timeframe: '未来6个月',
+            factors: ['移动端需求稳定', '新技术框架普及', '用户体验要求提升'],
+            recommendation: '建议关注React、Vue等主流框架，提升用户体验设计能力'
+          },
+          {
+            jobTitle: '产品经理',
+            industry: '互联网',
+            currentDemand: 88,
+            predictedGrowth: 12,
+            confidence: 82,
+            timeframe: '未来6个月',
+            factors: ['产品创新需求', '用户体验重视', '敏捷开发普及'],
+            recommendation: '建议加强产品设计能力，关注用户研究和数据分析'
+          },
+          {
+            jobTitle: 'UI设计师',
+            industry: '互联网',
+            currentDemand: 75,
+            predictedGrowth: 18,
+            confidence: 80,
+            timeframe: '未来6个月',
+            factors: ['视觉设计重要性提升', '品牌建设需求', '用户体验优化'],
+            recommendation: '建议关注设计趋势，提升交互设计和品牌设计能力'
+          }
+        ];
+
+        const reports: MarketAnalysisReport[] = [
+          {
+            id: 'RPT001',
+            title: '2024年12月市场分析报告',
+            reportType: 'monthly',
+            generateTime: '2024-12-01T00:00:00Z',
+            summary: '本月市场整体呈现稳定增长态势，技术岗位需求持续上升，特别是数据分析和测试相关职位。',
+            keyFindings: [
+              '技术岗位需求增长15%，其中数据分析师需求增长最快',
+              '一线城市岗位竞争激烈，二三线城市机会增多',
+              '远程工作模式逐渐成为主流，影响地域分布',
+              '技能要求更加多元化，复合型人才更受欢迎'
+            ],
+            marketTrends: [
+              { trend: '数字化转型加速', impact: 'high', description: '企业数字化转型需求推动技术岗位需求增长' },
+              { trend: 'AI技术普及', impact: 'medium', description: '人工智能技术在各行业的应用推动相关岗位需求' },
+              { trend: '远程工作常态化', impact: 'medium', description: '远程工作模式改变地域分布和技能要求' }
+            ],
+            emergingJobs: [
+              { jobTitle: 'AI产品经理', growthRate: 35, description: '负责AI产品规划管理', skills: ['产品管理','AI技术','数据分析','用户体验'] },
+              { jobTitle: '数据安全工程师', growthRate: 28, description: '负责数据安全与隐私保护', skills: ['网络安全','数据保护','合规管理','风险评估'] }
+            ],
+            recommendations: [
+              { category: '企业招聘', suggestion: '关注新兴技术岗位，提前布局人才储备', priority: 'high' },
+              { category: '人才培养', suggestion: '加强跨领域技能培训，培养复合型人才', priority: 'medium' },
+              { category: '市场策略', suggestion: '关注二三线城市市场，扩大招聘范围', priority: 'medium' }
+            ],
+            predictions: predictions.slice(0, 3)
+          },
+          {
+            id: 'RPT002',
+            title: '2024年第48周市场分析报告',
+            reportType: 'weekly',
+            generateTime: '2024-11-25T00:00:00Z',
+            summary: '本周市场活跃度较高，技术岗位投递量增长明显，特别是前端和测试岗位。',
+            keyFindings: [
+              '前端工程师岗位投递量增长20%',
+              '测试工程师需求持续增长',
+              '产品经理岗位竞争激烈',
+              'UI设计师岗位需求稳定'
+            ],
+            marketTrends: [
+              { trend: '技术岗位需求增长', impact: 'high', description: '前端与测试相关职位需求显著' }
+            ],
+            emergingJobs: [
+              { jobTitle: '全栈工程师', growthRate: 25, description: '具备前后端能力的工程师需求增长', skills: ['前端','后端','数据库','DevOps'] }
+            ],
+            recommendations: [
+              { category: '技能提升', suggestion: '建议技术人员学习全栈技能，提升竞争力', priority: 'high' }
+            ],
+            predictions: predictions.slice(3, 5)
+          }
+        ];
+
+        resolve({
+          predictions,
+          reports,
+          lastUpdated: new Date().toISOString()
+        });
+      }, 600);
+    });
+  },
+
+  // 生成新的市场分析报告
+  generateMarketReport: (reportType: 'weekly' | 'monthly') => {
+    return new Promise<MarketAnalysisReport>((resolve) => {
+      setTimeout(() => {
+        const now = new Date();
+        const reportId = `RPT${String(Date.now()).slice(-6)}`;
+        const title = reportType === 'weekly'
+          ? `${now.getFullYear()}年第${Math.ceil((now.getTime() - new Date(`${now.getFullYear()}-01-01`).getTime()) / (7 * 24 * 60 * 60 * 1000))}周市场分析报告`
+          : `${now.getFullYear()}年${now.getMonth() + 1}月市场分析报告`;
+
+        const report: MarketAnalysisReport = {
+          id: reportId,
+          title,
+          reportType,
+          generateTime: now.toISOString(),
+          summary: `${reportType === 'weekly' ? '本周' : '本月'}市场整体表现良好，技术岗位需求稳定增长。`,
+          keyFindings: ['技术岗位需求持续增长', '新兴技术岗位机会增多', '技能要求更加多元化', '远程工作模式普及'],
+          marketTrends: [{ trend: '技术岗位需求增长', impact: 'high', description: '新兴技术相关职位持续升温' }],
+          emergingJobs: [{ jobTitle: '新兴技术岗位', growthRate: 20, description: '新技术相关岗位需求增长', skills: ['新技术','创新思维','学习能力'] }],
+          recommendations: [{ category: '市场策略', suggestion: '关注新兴技术趋势，提前布局相关人才', priority: 'high' }],
+          predictions: []
+        };
+
+        resolve(report);
+      }, 800);
+    });
   }
+
 };
