@@ -29,6 +29,8 @@ import SupportManagement from '../pages/manager/SupportManagement';
 import OperatorAudit from '../pages/manager/OperatorAudit';
 import AdCampaignManagement from '../pages/manager/AdCampaignManagement';
 import {Settings} from '../pages/manager/setting';
+import EnterpriseAudit from '../pages/manager/EnterpriseAudit';
+import LogininManagement from '../pages/manager/LogininManagement.tsx';
 
 const router = createBrowserRouter([
   {
@@ -53,10 +55,6 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: 'content-management',
-        element: <ContentManagement />,
-      },
-      {
         path: 'workbench/homepage',
         element: <Dashboard />,
       },
@@ -76,8 +74,6 @@ const router = createBrowserRouter([
         path: 'data-management/:customerId',
         element: <DataDetail />,
       },
-
-
       {
         path: 'content-management',
         element: <ContentManagement />,
@@ -99,6 +95,10 @@ const router = createBrowserRouter([
         element: <OperatorAudit />,
       },
       {
+        path: 'company-audit',   // 与菜单 key 一致
+        element: <EnterpriseAudit />,
+      },
+      {
         path: 'c-job-management',
         element: <UserBehaviorAnalytics />,
       },
@@ -110,9 +110,11 @@ const router = createBrowserRouter([
         path: 'setting',
         element: <Settings />,
       },
+      
       {
-        path: 'workbench/homepage',
-        element: <Dashboard />,
+        path: 'loginin-management',
+        element: <LogininManagement />,
+
       },
       // {
       //   path: 'account-management',

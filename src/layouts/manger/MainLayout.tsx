@@ -63,6 +63,10 @@ const MainLayout = () => {
           key: 'data-management',
           label: '数据管理',
         },
+        {
+          key: 'loginin-management',
+          label: '部门注册',
+        },
       ],
     },
     {
