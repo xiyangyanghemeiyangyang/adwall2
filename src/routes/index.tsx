@@ -31,6 +31,7 @@ import AdCampaignManagement from '../pages/manager/AdCampaignManagement';
 import {Settings} from '../pages/manager/setting';
 import EnterpriseAudit from '../pages/manager/EnterpriseAudit';
 import LogininManagement from '../pages/manager/LogininManagement.tsx';
+import SystemAnnouncement from '../pages/manager/SystemAnnouncement';
 
 const router = createBrowserRouter([
   {
@@ -116,6 +117,10 @@ const router = createBrowserRouter([
         element: <LogininManagement />,
 
       },
+      {
+        path: 'system-announcement',
+        element: <SystemAnnouncement />,
+      }
       // {
       //   path: 'account-management',
       //   element: <AccountManagement />,

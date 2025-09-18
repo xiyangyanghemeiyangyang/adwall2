@@ -131,6 +131,11 @@ const MainLayout = () => {
       icon: <SettingOutlined />,
       label: '设置',
     },
+    {
+      key: 'paying',
+      icon: <SettingOutlined />,
+      label: '推广套餐',
+    },
   ];
 
   const handleMenuClick = (key: string) => {
