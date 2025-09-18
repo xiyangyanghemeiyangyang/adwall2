@@ -32,6 +32,8 @@ import {Settings} from '../pages/manager/setting';
 import EnterpriseAudit from '../pages/manager/EnterpriseAudit';
 import LogininManagement from '../pages/manager/LogininManagement.tsx';
 import SystemAnnouncement from '../pages/manager/SystemAnnouncement';
+import PromotionalPackages from '../pages/manager/PromotionalPackages.tsx';
+import UserFeedback from '../pages/manager/UserFeedback.tsx';
 
 const router = createBrowserRouter([
   {
@@ -111,7 +113,10 @@ const router = createBrowserRouter([
         path: 'setting',
         element: <Settings />,
       },
-      
+      {
+        path: 'paying',
+        element: <PromotionalPackages />,
+      },
       {
         path: 'loginin-management',
         element: <LogininManagement />,
@@ -120,7 +125,11 @@ const router = createBrowserRouter([
       {
         path: 'system-announcement',
         element: <SystemAnnouncement />,
-      }
+      },
+      {
+        path : 'user-feedback',
+        element: <UserFeedback />,
+      },
       // {
       //   path: 'account-management',
       //   element: <AccountManagement />,
