@@ -141,7 +141,10 @@ const MainLayout = () => {
   const handleMenuClick = (key: string) => {
     if (key === 'home') {
       navigate('/page/manger/dashboard');
-    } else {
+    } else if(key === 'join'){
+      navigate('/page/manger/join-us');
+
+    }else {
       navigate(`/page/manger/${key}`);
     }
     if (isMobile) {

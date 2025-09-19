@@ -4,6 +4,8 @@ import OperatorLayout from '../layouts/operater/mainlayout';
 import OperatorDashboard from '../pages/operator/Dashboard';
 import Dashboard from '../pages/manager/Dashboard';
 import Login from '../pages/Login';
+import ManagerJoinUs from '../pages/manager/JoinUs';
+import OperatorJoinUs from '../pages/operator/JoinUs';
 // import NotFound from '../pages/NotFound';
 import CustomerManagement from '../pages/manager/CustomerManagement';
 import CustomerDetail from '../pages/manager/CustomerDetail';
@@ -44,6 +46,7 @@ const router = createBrowserRouter([
     path: '/login',
     element: <Login />,
   },
+  
   // 管理者工作台
   {
     path: '/page/manger',
@@ -130,6 +133,10 @@ const router = createBrowserRouter([
         path : 'user-feedback',
         element: <UserFeedback />,
       },
+      {
+        path:'join-us',
+        element: <ManagerJoinUs />,
+      },
       // {
       //   path: 'account-management',
       //   element: <AccountManagement />,
@@ -176,6 +183,10 @@ const router = createBrowserRouter([
       {
         path: 'data-management',
         element: <div />,
+      },
+      {
+        path: 'join-us',
+        element: <OperatorJoinUs />,
       },
     ],
   },

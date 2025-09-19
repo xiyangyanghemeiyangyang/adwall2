@@ -120,6 +120,9 @@ const MainLayout = () => {
   const handleMenuClick = (key: string) => {
     if (key === 'home') {
       navigate('/page/operator/dashboard');
+    }else if(key === 'join'){
+      navigate('/page/operator/join-us');
+
     } else {
       navigate(`/page/operator/${key}`);
     }
