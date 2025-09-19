@@ -144,6 +144,10 @@ const MainLayout = () => {
     } else if(key === 'join'){
       navigate('/page/manger/join-us');
 
+    }
+    else if(key === 'about'){
+      navigate('/page/manger/about-us');
+
     }else {
       navigate(`/page/manger/${key}`);
     }
@@ -234,7 +238,7 @@ const MainLayout = () => {
               >
                 <Menu.Item key="home">首页</Menu.Item>
                 <Menu.Item key="about">关于我们</Menu.Item>
-                <Menu.Item key="product">产品介绍</Menu.Item>
+                {/* <Menu.Item key="product">产品介绍</Menu.Item> */}
                 <Menu.Item key="join">加入我们</Menu.Item>
               </Menu>
             ) : (

@@ -6,6 +6,8 @@ import Dashboard from '../pages/manager/Dashboard';
 import Login from '../pages/Login';
 import ManagerJoinUs from '../pages/manager/JoinUs';
 import OperatorJoinUs from '../pages/operator/JoinUs';
+import ManagerAboutUs from '../pages/manager/AboutUs';
+import OperatorAboutUs from '../pages/operator/AboutUs';
 // import NotFound from '../pages/NotFound';
 import CustomerManagement from '../pages/manager/CustomerManagement';
 import CustomerDetail from '../pages/manager/CustomerDetail';
@@ -137,6 +139,10 @@ const router = createBrowserRouter([
         path:'join-us',
         element: <ManagerJoinUs />,
       },
+      {
+        path: 'about-us',
+        element: <ManagerAboutUs />,
+      },
       // {
       //   path: 'account-management',
       //   element: <AccountManagement />,
@@ -187,6 +193,10 @@ const router = createBrowserRouter([
       {
         path: 'join-us',
         element: <OperatorJoinUs />,
+      },
+      {
+        path: 'about-us',
+        element: <OperatorAboutUs />,
       },
     ],
   },
